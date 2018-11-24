@@ -10,8 +10,11 @@ name = "pypi"
 sqlalchemy = "*"
 flask-sqlalchemy = "*"
 flask-security = "*"
+"dogpile.cache" = "*"
+walrus = "*"
 
 
 [dev-packages]
 
 pylint = "*"
+black = "*"

@@ -9,15 +9,22 @@ from sqlalchemy import Column, DateTime, Integer, event, inspect
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base, declared_attr
 from sqlalchemy.orm.attributes import get_history
 from sqlalchemy.orm.interfaces import MapperOption
+from flask_security import Security
 
 from config import REDIS_URL
-from corelib.db import PropsMixin
+from corelib.db import PropsMixin, PropsItem
 
 
 def md5_key_mangler(key):
     if key.startswith("SELECT "):
         key = hashlib.md5(key.encode("ascii")).hexdigest()
     return key
+
+
+regions = dict(
+    default=make_region(key_mangler=md5_key_mangler).configure("dogpile.cache.redis"),
+    arguments={"url": REDIS_URL},
+)
 
 
 def memoize(obj):
@@ -33,14 +40,94 @@ def memoize(obj):
     return memoizer
 
 
-regions = dict(
-    default=make_region(key_mangler=md5_key_mangler).configure("dogpile.cache.redis"),
-    arguments={"url": REDIS_URL},
-)
+def _key_from_query(query, qualifier=None):
+    stmt = query.with_labels().statement
+    compiled = stmt.compile()
+    params = compiled.params
+    return " ".join([str(compiled)] + [str(params[k] for k in sorted(params))])
+
+
+class CachingQuery(BaseQuery):
+    def __init__(self, regions, entities, *args, **kwargs):
+        self.cache_regions = regions
+        super().__init__(entities=entities, *args, **kwargs)
+
+    def __iter__(self):
+        if hasattr(self, "_cache_region"):
+            return self.get_value(createfunc=lambda: list(BaseQuery.__iter__(self)))
+        else:
+            return BaseQuery.__iter__(self)
+
+    def _get_cache_plus_key(self):
+        dogpile_region = self.cache_regions[self._cache_region.region]
+        if self._cache_region.cache_key:
+            key = self._cache_region.cache_key
+        else:
+            key = _key_from_query(self)
+        return dogpile_region, key
+
+    def invalidate(self):
+        dogpile_region, cache_key = self._get_cache_plus_key()
+        dogpile_region.delete(cache_key)
+
+    def get_value(
+        self, merge=True, createfunc=None, expiration_time=None, ignore_expiration=False
+    ):
+        dogpile_region, cache_key = self._get_cache_plus_key()
+        assert (
+            not ignore_expiration or not createfunc
+        ), "can`t ignore expiration and also provide createfunc"
+        if ignore_expiration or not createfunc:
+            cached_value = dogpile_region.get(
+                cache_key,
+                expiration_time=expiration_time,
+                ignore_expiration=ignore_expiration,
+            )
+        else:
+            cached_value = dogpile_region.get_or_create(
+                cache_key, createfunc, expiration_time=expiration_time
+            )
+        if cached_value is NO_VALUE:
+            raise KeyError(cache_key)
+        if merge:
+            cached_value = self.merge_result(cached_value, load=False)
+        return cached_value
+
+    def set_value(self, value):
+        dogpile_region, cache_key = self._get_cache_plus_key()
+        dogpile_region.set(cache_key, value)
 
 
 def query_callable(regions, query_cls=CachingQuery):
     return functools.partial(query_cls, regions)
+
+
+class FromCache(MapperOption):
+    propagate_to_loaders = False
+
+    def __init__(self, region="default", cache_key=None):
+        self.region = region
+        self.cache_key = cache_key
+
+    def process_query(self, query):
+        query._cache_region = self
+
+
+class Query:
+    def __init__(self, entities):
+        self.entities = entities
+
+    def __iter__(self):
+        return self.entities
+
+    def first(self):
+        try:
+            return self.entities.__next__()
+        except StopIteration:
+            return None
+
+    def all(self):
+        return list(self.entities)
 
 
 class Cache:
@@ -192,3 +279,43 @@ class BaseModel(PropsMixin, Model):
         event.listen(cls, "before_delete", cls._flush_event)
         event.listen(cls, "after_update", cls._flush_event)
         event.listen(cls, "after_insert", cls._flush_del_event)
+
+
+class BindDBPropertyMixin:
+    def __init__(cls, name, bases, d):
+        super().__init__(name, bases, d)
+        db_columns = []
+        for k, v in d.items():
+            if isinstance(v, PropsItem):
+                db_columns.append((k, v.default))
+        setattr(cls, "_db_columns", db_columns)
+
+
+class CombinedMeta(BindDBPropertyMixin, DefaultMeta):
+    pass
+
+
+class UnLockedAlchemy(SQLAlchemy):
+    def make_declarative_base(self, model, metadata=None):
+        if not isinstance(model, DeclarativeMeta):
+            model = declarative_base(
+                cls=model, name="Model", metadata=metadata, metaclass=CombinedMeta
+            )
+        if metadata is not None and model.metadata is not metadata:
+            model.metadata = metadata
+
+        if not getattr(model, "query_class", None):
+            model.query_class = self.Query
+
+        model.query = _QueryProperty(self)
+        return model
+
+    def apply_driver_hacks(self, app, info, options):
+        if "isolation_level" not in options:
+            options["isolation_level"] = "READ COMMITTED"
+        return super().apply_driver_hacks(app, info, options)
+
+
+db = UnLockedAlchemy(model_class=BaseModel)
+security = Security()
+

@@ -71,3 +71,7 @@ class PropsMixin:
         self.set_props_item(key, n)
         return n
 
+
+class PropsItem:
+    def __init__(self):
+        pass

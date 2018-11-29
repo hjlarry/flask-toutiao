@@ -12,7 +12,7 @@ from sqlalchemy.orm.interfaces import MapperOption
 from flask_security import Security
 
 from config import REDIS_URL
-from corelib.db import PropsMixin, PropsItem
+from corelib.db import PropsMixin, PropsItem 
 
 
 def md5_key_mangler(key):

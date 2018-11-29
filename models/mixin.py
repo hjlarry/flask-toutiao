@@ -1,0 +1,4 @@
+
+
+class BaseMixin:
+    pass

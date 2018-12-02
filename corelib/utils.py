@@ -46,6 +46,7 @@ def is_numeric(value):
 
 
 class Empty:
+    """区分从缓存中拿到的值本身就是空对象 还是没有拿到值"""
     def __call__(self, *a, **kw):
         return empty
 

@@ -22,6 +22,3 @@ def create_app():
 
 app = create_app()
 
-if __name__ == "__main__":
-    app.jinja_env.auto_reload = True
-    app.run(port=8080, debug=True, use_reloader=True, threaded=True)

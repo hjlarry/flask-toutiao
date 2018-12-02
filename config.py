@@ -1,10 +1,10 @@
-import os
+import pathlib
 
-HERE = os.path.abspath(os.path.dirname(__file__))
+HERE = pathlib.Path(__file__).resolve()
 REDIS_URL = "redis://localhost:6379"
 CACHE_REDIS_URL = REDIS_URL
 DEBUG = False
-UPLOAD_FOLDER = os.path.join(HERE, "permdir")
+UPLOAD_FOLDER = HERE / "permdir"
 SQLALCHEMY_RECORD_QUERIES = True
 DATABASE_QUERY_TIMEOUT = 0.5
 SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -49,8 +49,8 @@ SOCIAL_AUTH_FIELDS_STORED_IN_SESSION = ["keep"]
 
 CACHE_TYPE = "redis"
 
-if not os.path.exists(UPLOAD_FOLDER):
-    os.mkdir(UPLOAD_FOLDER)
+if not UPLOAD_FOLDER.exists():
+    UPLOAD_FOLDER.mkdir()
 
 try:
     from local_settings import *  # noqa

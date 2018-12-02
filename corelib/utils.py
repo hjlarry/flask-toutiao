@@ -37,6 +37,14 @@ def generate_id():
     return binascii.hexlify(oid).decode("utf-8")
 
 
+def is_numeric(value):
+    try:
+        int(value)
+    except (TypeError, ValueError):
+        return False
+    return True
+
+
 class Empty:
     def __call__(self, *a, **kw):
         return empty

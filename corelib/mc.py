@@ -98,3 +98,34 @@ def cache(key_pattern, expire=None):
         return _
 
     return deco
+
+
+def pcache(key_pattern, count=300, expire=None):
+    def deco(f):
+        arg_names, varargs, varkw, defaults = inspect.getargspec(f)
+        if varargs or varkw:
+            raise Exception("do not support varargs")
+        if not ("limit" in arg_names):
+            raise Exception("function must has 'limit' in args")
+        gen_key = gen_key_factory(key_pattern, arg_names, defaults)
+
+        @functools.wraps(f)
+        def _(*a, **kw):
+            key, args = gen_key(*a, **kw)
+            start = int(args.pop("start", 0))
+            limit = int(args.pop("limit"))
+            if not key or limit is None or start + limit > count:
+                return f(*a, **kw)
+            force = kw.pop("force", False)
+            r = rdb.get(key) if not force else None
+            if r is None:
+                r = f(limit=count, **args)
+                r = dumps(r)
+                rdb.set(key, r, expire)
+            r = loads(r)
+            return r[start : start + limit]
+
+        _.original_function = f
+        return _
+
+    return deco

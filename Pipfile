@@ -12,6 +12,7 @@ flask-sqlalchemy = "*"
 flask-security = "*"
 "dogpile.cache" = "*"
 walrus = "*"
+requests = "*"
 
 
 [dev-packages]

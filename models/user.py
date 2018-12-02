@@ -1,7 +1,17 @@
-from flask_security import UserMixin
+import requests
+from flask_security import UserMixin, RoleMixin, SQLAlchemyUserDatastore
+from sqlalchemy import func as alchemyFn
 
 from ext import db
+from config import UPLOAD_FOLDER
 from models.mixin import BaseMixin
+from corelib.utils import generate_id
+
+roles_users = db.Table(
+    "roles_users",
+    db.Column("user_id", db.Integer(), db.ForeignKey("users.id")),
+    db.Column("role_id", db.Integer(), db.ForeignKey("role.id")),
+)
 
 
 class User(db.Model, UserMixin, BaseMixin):
@@ -23,7 +33,62 @@ class User(db.Model, UserMixin, BaseMixin):
     confirmed_at = db.Column(db.DateTime())
     company = db.Column(db.String(191), default="")
     avatar_id = db.Column(db.String(20), default="")
+    roles = db.relationship(
+        "Role", secondary=roles_users, backref=db.backref("users", lazy="dynamic")
+    )
+
+    __table_args__ = (db.Index("idx_name", name), db.Index("idx_email", email))
+
+    def url(self):
+        return f"/user/{self.id}"
+
+    @property
+    def avatar_path(self):
+        avatar_id = self.avatar_id
+        return "" if not avatar_id else f"/static/avatars/{avatar_id}.png"
+
+    def update_avatar(self, avatar_id):
+        self.avatar_id = avatar_id
+        self.save()
+
+    def upload_avatar(self, avatar_url):
+        avatar_id = generate_id()
+        filename = UPLOAD_FOLDER / "avatars" / f"{avatar_id}.png"
+        r = requests.get(avatar_id, stream=True)
+        if r.status_code == 200:
+            with open(filename, "wb") as f:
+                for chunk in r.iter_content(1024):
+                    f.write(chunk)
+            self.avatar_id = avatar_id
+            self.save()
 
 
-user_datastore = None
+class Role(db.Model, RoleMixin):
+    name = db.Column(db.String(80), unique=True)
+    description = db.Column(db.String(191))
+
+
+class BranSQLAlchemyUserDatastore(SQLAlchemyUserDatastore):
+    def get_user_name(self, identifier):
+        return self._get_user(identifier, "name")
+
+    def get_user_email(self, identifier):
+        return self._get_user(identifier, "email")
+
+    def _get_user(self, identifier, attr):
+        user_model_query = self.user_model.query
+        if hasattr(self.user_model, "roles"):
+            from sqlalchemy.orm import joinedload
+
+            user_model_query = user_model_query.options(joinedload("roles"))
+
+        query = alchemyFn.lower(getattr(self.user_model, attr)) == alchemyFn.lower(
+            identifier
+        )
+        rv = user_model_query.filter(query).first()
+        if rv is not None:
+            return rv
+
+
+user_datastore = BranSQLAlchemyUserDatastore(db, User, Role)
 

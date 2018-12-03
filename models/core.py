@@ -24,7 +24,7 @@ class Post(BaseMixin, CommentMixin, db.Model):
     __table_args__ = (db.Index("idx_title", title),)
 
     def url(self):
-        return f"/{self.__class__.__name__.lower()}/{self.slug or self.id}/"
+        return f"/{self.__class__.__name__.lower()}/{self.title or self.id}/"
 
     @classmethod
     def __flush_event__(cls, target):
@@ -32,9 +32,6 @@ class Post(BaseMixin, CommentMixin, db.Model):
 
     @classmethod
     def get(cls, identifier):
-        post = cls.cache.filter(slug=identifier).first()
-        if post:
-            return post
         if is_numeric(identifier):
             return cls.cache.get(identifier)
         return cls.cache.filter(title=identifier).first()
@@ -46,6 +43,7 @@ class Post(BaseMixin, CommentMixin, db.Model):
             .filter(PostTag.post_id == self.id)
             .all()
         )
+        
         tags = Tag.query.filter(Tag.id.in_((id for id in at_ids)))
         tags = [t.name for t in tags]
         return tags
@@ -105,6 +103,8 @@ class PostTag(BaseMixin, db.Model):
 
     @classmethod
     def update_multi(cls, post_id, tags):
+        
+
         origin_tags = Post.get(post_id).tags
         need_add = set()
         need_del = set()

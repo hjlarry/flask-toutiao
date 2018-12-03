@@ -12,6 +12,7 @@ walrus = "*"
 requests = "*"
 flask_migrate = "*"
 pymysql = "*"
+feedparser = "*"
 
 [dev-packages]
 pylint = "*"

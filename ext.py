@@ -271,7 +271,7 @@ class BaseModel(PropsMixin, Model):
         target.__flush_event__(target)
 
     @classmethod
-    def _flush_event(cls, target):
+    def __flush_event__(cls, target):
         pass
 
     @classmethod

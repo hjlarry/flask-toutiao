@@ -10,6 +10,7 @@ from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base, declar
 from sqlalchemy.orm.attributes import get_history
 from sqlalchemy.orm.interfaces import MapperOption
 from flask_security import Security
+from flask_mail import Mail
 
 from config import REDIS_URL
 from corelib.db import PropsMixin, PropsItem 
@@ -318,4 +319,4 @@ class UnLockedAlchemy(SQLAlchemy):
 
 db = UnLockedAlchemy(model_class=BaseModel)
 security = Security()
-
+mail = Mail()

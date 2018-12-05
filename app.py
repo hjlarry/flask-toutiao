@@ -1,7 +1,8 @@
 from flask import Flask
 
 import config
-import views.index as index
+from views.index import bp as index_bp
+from views.account import bp as account_bp
 from corelib.exmail import send_mail
 from ext import db, security, mail
 from forms import ExtendedRegisterForm
@@ -22,7 +23,8 @@ def create_app():
     app.security = security
     security.send_mail_task(send_mail)
 
-    app.register_blueprint(index.bp, url_prefix="/")
+    app.register_blueprint(index_bp, url_prefix="/")
+    app.register_blueprint(account_bp, url_prefix="/")
 
     return app
 

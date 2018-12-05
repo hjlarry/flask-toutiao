@@ -15,9 +15,9 @@ SECURITY_REGISTERABLE = True
 SECURITY_RECOVERABLE = True
 SECURITY_CHANGEABLE = True
 SECURITY_TRACKABLE = True
-SECURITY_POST_REGISTER_VIEW = (
-    SECURITY_POST_RESET_VIEW
-) = SECURITY_POST_CONFIRM_VIEW = "online.landing"  # noqa
+SECURITY_POST_REGISTER_VIEW = "account.landing"
+SECURITY_POST_RESET_VIEW = "account.landing"
+SECURITY_POST_CONFIRM_VIEW = "account.landing"
 SECURITY_PASSWORD_SALT = "234"
 
 SQLALCHEMY_DATABASE_URI = (
@@ -60,10 +60,7 @@ SECURITY_EMAIL_SUBJECT_PASSWORD_NOTICE = "密码已被重置 - 头条"
 SECURITY_MSG_UNAUTHORIZED = ("你没有权限访问这个资源", "error")
 SECURITY_MSG_PASSWORD_MISMATCH = ("密码不匹配", "error")
 SECURITY_MSG_PASSWORD_RESET_EXPIRED = (
-    (
-        "你没有在指定时间 %(within)s 内重置你的密码 "
-        "新的邮件已发至你的邮箱了 %(email)s."
-    ),
+    ("你没有在指定时间 %(within)s 内重置你的密码 " "新的邮件已发至你的邮箱了 %(email)s."),
     "error",
 )
 SECURITY_MSG_DISABLED_ACCOUNT = ("账号被禁用了.", "error")

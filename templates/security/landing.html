@@ -4,12 +4,11 @@
   <section>
     <div class="center">
       <div class="landing">
-      {% if type in ('reset', 'confirm', 'register') %}
-      <h3 class="title">申请提交成功！请{{action}}账号</h3>
-
+      
+      <h3 class="title">申请提交成功！</h3>
       <div class="cont">
         <div class="desc">
-          {{action}}邮件已经发送到{{email}}邮箱，请在6小时内登录邮箱点击链接完成{{action}}
+          邮件已经发送到邮箱，请在6小时内登录邮箱点击链接
         </div>
         <div class="split"></div>
         <div class="email_rel">
@@ -21,15 +20,11 @@
           </ul>
         </div>
       </div>
-      {% else %}
-      <p class="confirmed">{{email}}已确认！<a href="{{ url_for_security('login') }}">请登录</a></p>
-      {% endif %}
+      <div class="split"></div>
+      <h3>已确认？</h3>
+      <p class="confirmed"><a href="{{ url_for_security('login') }}">立即登录</a></p>
+      
       </div>
     </div>
   </section>
-{% endblock %}
-
-{% block bottomscript %}
-   {{ super() }}
-   <script src="{{url_for('static', filename='dist/landing.js')}}"></script>
 {% endblock %}

@@ -6,6 +6,22 @@
     margin: 15px 15px 15px 55px;
 }
 
+.social-share-button {
+    margin: 20px 0;
+}
+
+.weixin-qrcode-dropdown {
+    display: inline-block;
+
+    .weixin-qrcode-dropdown-menu {
+        min-width: 122px;
+        line-height: 16px;
+        padding: 5px;
+        text-align: center;
+        top: 110%;
+        left: -76px;
+    }
+}
 
 .login-actions {
     margin: 15px;

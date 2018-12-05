@@ -45,9 +45,7 @@ class Post(BaseMixin, CommentMixin, db.Model):
             .filter(PostTag.post_id == self.id)
             .all()
         )
-
-        tags = Tag.query.filter(Tag.id.in_((id for id in at_ids)))
-        tags = [t.name for t in tags]
+        tags = Tag.query.filter(Tag.id.in_((id for id, in at_ids))).all()
         return tags
 
     @cached_hybrid_property

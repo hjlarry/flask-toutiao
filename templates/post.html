@@ -8,8 +8,39 @@
 {%block title%} {{post.title}} {% endblock %}
 {% block content %}
 {{ macros.card(post)}}
+<div class="post-tags">
+    {% for tag in post.tags %}
+      <a class="btn btn-default btn-rounded btn-xs" href="{{ tag.url() }}">{{ tag.name }}</a>
+    {% endfor %}
+  </div>
+
+
+<div class="social-share-button text-center" data-title="不改一行代码定位线上性能问题 {{ url }} 分享自 @{{ post.author.name }}" data-type="text" data-url={{ url }}>
+    <h5>分享到</h5>
+    <a href="javascript:;" class="btn btn-danger" rel="external nofollow" data-site="github" onclick="return SocialShareButton.share(this);"><i class="fa fa-weibo"></i> Github</a>
+    <span class="dropdown weixin-qrcode-dropdown">
+      <button class="btn btn-success" id="weixin-qrcode" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-weixin"></i> 微信</button>
+      <span class="dropdown-menu weixin-qrcode-dropdown-menu" aria-labelledby="weixin-qrcode" data-url="{{ url }}">
+        <span class="weixin-qrcode" aria-labelledby="weixin-qrcode" data-url="{{ url }}"><canvas width="132" height="132"></canvas></span>
+      </span>
+    </span>
+  </div>
+    <div class="post-comment-form">
+    <span>评论 (15)</span>
+
+    <div class="login-actions">
+      <a class="btn btn-success" href="/signin">登录后评论</a>
+    </div>
+  </div>
+
+  <div id="comments" class="comments">
+    <div class="comment media">
+      <a class="media-left" href="/u/127127"><img src="https://img.toutiao.io/user/695893d4dd314e34a41fea38ef90ae75/thumb" alt="Thumb"></a>
+      <div class="media-body">
+        <h4 class="media-heading">u369511 <small class="date">2018-01-15 10:24</small></h4>
+        <div>多年以前在github上，有一个日本的做过</div>
+      </div>
+    </div>
+  </div>
+
 {% endblock %}
-
-
-
-

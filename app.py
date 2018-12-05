@@ -5,7 +5,7 @@ from views.index import bp as index_bp
 from views.account import bp as account_bp
 from corelib.exmail import send_mail
 from ext import db, security, mail
-from forms import ExtendedRegisterForm
+from forms import ExtendedRegisterForm, ExtendedLoginForm
 from models.user import user_datastore
 
 
@@ -17,7 +17,7 @@ def create_app():
     mail.init_app(app)
 
     _state = security.init_app(
-        app, user_datastore, confirm_register_form=ExtendedRegisterForm
+        app, user_datastore, confirm_register_form=ExtendedRegisterForm, login_form=ExtendedLoginForm
     )
     security._state = _state
     app.security = security

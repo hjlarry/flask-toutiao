@@ -1,5 +1,6 @@
 from flask_security.forms import (
     RegisterForm,
+    LoginForm,
     StringField,
     PasswordField,
     ValidationError,
@@ -37,4 +38,9 @@ class ExtendedRegisterForm(RegisterForm):
             password_required,
         ],
     )
+
+
+class ExtendedLoginForm(LoginForm):
+    email = StringField("邮箱/用户名", validators=[Required(message="未输入账号内容")])
+    password = PasswordField("密码", validators=[password_required])
 

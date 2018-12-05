@@ -1,12 +1,14 @@
 import pathlib
 
 from ext import db
-from models.mixin import BaseMixin
-from models.consts import K_POST
-from models.comment import CommentMixin
 from corelib.db import PropsItem
 from corelib.mc import rdb, cache
-from corelib.utils import cached_hybrid_property, is_numeric
+from corelib.utils import cached_hybrid_property, is_numeric, trunc_utf8
+
+from .mixin import BaseMixin
+from .consts import K_POST
+from .comment import CommentMixin
+from .user import User
 
 MC_KEY_ALL_TAGS = "core:all_tags"
 HERE = pathlib.Path(__file__).resolve()
@@ -43,14 +45,18 @@ class Post(BaseMixin, CommentMixin, db.Model):
             .filter(PostTag.post_id == self.id)
             .all()
         )
-        
+
         tags = Tag.query.filter(Tag.id.in_((id for id in at_ids)))
         tags = [t.name for t in tags]
         return tags
 
     @cached_hybrid_property
     def abstract_content(self):
-        return self.content
+        return trunc_utf8(self.content, 100)
+
+    @cached_hybrid_property
+    def author(self):
+        return User.get(self.author_id)
 
     @classmethod
     def create_or_update(cls, **kwargs):
@@ -103,7 +109,6 @@ class PostTag(BaseMixin, db.Model):
 
     @classmethod
     def update_multi(cls, post_id, tags):
-        
 
         origin_tags = Post.get(post_id).tags
         need_add = set()

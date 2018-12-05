@@ -1,0 +1,78 @@
+@import "./card.scss";
+
+body {
+    color: #58666e;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.42857143;
+}
+
+
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+h3,
+.h3 {
+    font-size: 24px;
+}
+
+h5,
+.h5 {
+    font-size: 14px;
+}
+
+a {
+    color: #29afec;
+}
+
+header.navbar {
+    height: 62px;
+    background: #29afec;
+    padding: 5px 0 5px 0;
+    color: #FFF;
+    box-shadow: 0px 1px 0px 0px rgba(83, 69, 64, 0.16), 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
+
+    & .nav>li>a:hover,
+    & .nav>li.active>a:hover,
+    & .nav>li>a.active,
+    & .nav>li>a.active {
+        color: #FFF;
+        border-color: #FFF;
+        background-color: transparent;
+        border-bottom: 2px solid #FFF;
+    }
+}
+
+.nav-link,
+footer a,
+footer a:visited {
+    color: #FFF;
+}
+
+#main {
+    margin: 20px auto;
+}
+
+footer a:hover,
+footer a:active {
+    color: #FFF;
+    border-bottom: 1px solid #FFF;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 30px 0 15px 0;
+    background: #29afec;
+    background: #29afec;
+    color: #FFF;
+    vertical-align: baseline;
+}

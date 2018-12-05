@@ -1,0 +1,56 @@
+{% macro card(post) %}
+{% set author = post.author %}
+  <div class="post detail">
+    <div class="btn-group-vertical upvote">
+      <a id="like-button-{{ post.id }}" class="btn btn-default btn-xs like-button" title="" data-remote="true" rel="nofollow" data-method="post" href="/likes/post/{{ post.id }}" data-original-title="点赞">
+        <i class="iconfont toutiao-zan"></i> <span>8</span>
+      </a>
+
+      <a id="favorite-button-{{ post.id }}" class="btn btn-default btn-xs favorite-button" title="" data-remote="true" rel="nofollow" data-method="post" href="/favorites/post/{{ post.id }}" data-original-title="收藏">
+        <i class="iconfont toutiao-shoucang"></i>
+      </a>
+    </div>
+
+    <div class="content">
+      <h3 class="title">
+        <a target="_blank" rel="external" title="{{ post.title }} - 开发者头条" href="{{ post.orig_url }}">
+          {{ post.title }}
+        </a>
+      </h3>
+      <p class="summary"><a href="{{ post.url() }}">{{ post.abstract_content }}</a></p>
+      <div class="meta">
+        {{ post.orig_url }}
+        <span>
+          <i class="iconfont toutiao-comment-o"></i> 0
+        </span>
+      </div>
+    </div>
+
+<div class="user-info">
+  <div class="user-avatar">
+    <a title="{{ author.name }} - 开发者头条" href="">
+      <img width="32" alt="{{ author.name }} - 独家号" src="{{ author.avatar_path }}">
+    </a>
+  </div>
+
+  <div class="info">
+    <h5>作者</h5>
+
+    <a href="/u/200993"><img width="48" alt="{{ author.name }} - 开发者头条" src="{{ author.avatar_path }}"></a>
+
+    <h4 class="m-b-xs">{{ author.name }}</h4>
+
+    <p class="bio">{{ author.bio }}</p>
+
+    <a class="btn btn-info btn-xs follow-200993" data-disable-with="请稍候..." data-remote="true" rel="nofollow" data-method="post" href="">
+      <i class="fa fa-eye"></i> 关注TA
+    </a>
+  </div>
+</div>
+
+<div class="subject-name">
+  <a href="">{{ author.name }}</a></div>
+
+  </div>
+
+{% endmacro %}

@@ -13,6 +13,7 @@ requests = "*"
 flask_migrate = "*"
 pymysql = "*"
 feedparser = "*"
+bcrypt = "*"
 
 [dev-packages]
 pylint = "*"

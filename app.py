@@ -2,6 +2,7 @@ from flask import Flask
 
 import config
 from ext import security, db
+from forms import ExtendedRegisterForm
 import views.index as index
 
 
@@ -12,7 +13,9 @@ def create_app():
     app.config.from_object(config)
     db.init_app(app)
 
-    _state = security.init_app(app, user_datastore)
+    _state = security.init_app(
+        app, user_datastore, confirm_register_form=ExtendedRegisterForm
+    )
     security._state = _state
 
     app.register_blueprint(index.bp, url_prefix="/")

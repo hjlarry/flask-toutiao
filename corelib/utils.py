@@ -45,6 +45,12 @@ def is_numeric(value):
     return True
 
 
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__dict__ = self
+
+
 def trunc_utf8(string, num, etc="..."):
     if num >= len(string):
         return string

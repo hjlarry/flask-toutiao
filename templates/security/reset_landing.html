@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section>
+    <div class="center">
+      <div class="landing">
+      
+      <h3 class="title">密码已重置成功！</h3>
+      <div class="cont">
+        <div class="desc">
+           <p class="confirmed"><a href="{{ url_for_security('login') }}">立即登录</a></p>
+        </div>
+      </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

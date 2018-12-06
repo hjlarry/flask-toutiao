@@ -1,6 +1,2 @@
 {% extends 'base.html' %}
 
-{% block bottomscript %}
-{{ super() }}
-  <script src="{{url_for('static', filename='dist/security.js')}}"></script>
-{% endblock %}

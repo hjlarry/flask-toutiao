@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <p class="title">{{ '当前用户: {}'.format(request.user.name) if request.user else '未登录' }}</p>
+{% endblock %}

@@ -14,6 +14,7 @@ flask_migrate = "*"
 pymysql = "*"
 feedparser = "*"
 bcrypt = "*"
+flask-debugtoolbar = "*"
 
 [dev-packages]
 pylint = "*"

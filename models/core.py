@@ -30,7 +30,7 @@ class Post(BaseMixin, CommentMixin, db.Model):
     __table_args__ = (db.Index("idx_title", title),)
 
     def url(self):
-        return f"/{self.__class__.__name__.lower()}/{self.title or self.id}/"
+        return f"/{self.__class__.__name__.lower()}/{self.id or self.title}"
 
     @classmethod
     def __flush_event__(cls, target):
@@ -116,7 +116,7 @@ class PostTag(BaseMixin, db.Model):
         return posts
 
     @classmethod
-    @cache(MC_KEY_POSTS_BY_TAG.format("{identifier}"))
+    @cache(MC_KEY_POST_COUNT_BY_TAG.format("{identifier}"))
     def get_count_by_tag(cls, identifier):
         query = cls._get_post_by_tag(identifier)
         return query.count()

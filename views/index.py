@@ -18,9 +18,9 @@ def avatars(path):
     return send_from_directory(UPLOAD_FOLDER / "avatars", path)
 
 
-@bp.route("/post/<int:id>")
-def post(id):
-    post = Post.get_or_404(id)
+@bp.route("/post/<identifier>")
+def post(identifier):
+    post = Post.get(identifier)
     return render_template("post.html", post=post)
 
 @bp.route('/tags/<identifier>')

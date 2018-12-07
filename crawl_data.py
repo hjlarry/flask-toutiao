@@ -51,7 +51,7 @@ def fetch(url):
 
         try:
             ok, _ = Post.create_or_update(
-                author_id=100001,
+                author_id=2,
                 title=entry.title,
                 orig_url=entry.link,
                 content=strip_tags(content),

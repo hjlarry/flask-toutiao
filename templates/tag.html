@@ -13,5 +13,5 @@
   {% for post in posts.items %}
     {{ macros.card(post) }}
   {% endfor %}
-  {# {{ macros.render_pagination(posts, 'index.tag', ident) }} #}
+  {{ macros.render_pagination(posts, 'index.tag', identifier) }}
 {% endblock %}

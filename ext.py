@@ -15,7 +15,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask import abort
 
 from config import REDIS_URL
-from corelib.db import PropsMixin, PropsItem 
+from corelib.db import PropsMixin, PropsItem
 
 
 def md5_key_mangler(key):
@@ -275,20 +275,32 @@ class BaseModel(PropsMixin, Model):
         target.cache._flush_all(target)
         target.__flush_event__(target)
 
-    @staticmethod
-    def _flush_del_event(mapper, connection, target):
-        target.cache._flush_all(target)
-        target.__flush_event__(target)
-
     @classmethod
     def __flush_event__(cls, target):
         pass
 
+    @staticmethod
+    def _flush_insert_event(mapper, connection, target):
+        target._flush_event(mapper, connection, target)
+
+    @staticmethod
+    def _flush_before_update_event(mapper, connection, target):
+        target._flush_event(mapper, connection, target)
+
+    @staticmethod
+    def _flush_after_update_event(mapper, connection, target):
+        target._flush_event(mapper, connection, target)
+
+    @staticmethod
+    def _flush_delete_event(mapper, connection, target):
+        target._flush_event(mapper, connection, target)
+
     @classmethod
     def __declare_last__(cls):
-        event.listen(cls, "before_delete", cls._flush_event)
-        event.listen(cls, "after_update", cls._flush_event)
-        event.listen(cls, "after_insert", cls._flush_del_event)
+        event.listen(cls, "after_insert", cls._flush_insert_event)
+        event.listen(cls, "before_update", cls._flush_before_update_event)
+        event.listen(cls, "after_update", cls._flush_after_update_event)
+        event.listen(cls, "after_delete", cls._flush_delete_event)
 
 
 class BindDBPropertyMixin:

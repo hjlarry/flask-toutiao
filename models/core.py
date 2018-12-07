@@ -1,4 +1,5 @@
 import pathlib
+import math
 
 from ext import db
 from corelib.db import PropsItem
@@ -10,10 +11,10 @@ from .consts import K_POST
 from .comment import CommentMixin
 from .user import User
 
-PER_PAGE = 2
+PER_PAGE = 10
 MC_KEY_ALL_TAGS = "core:all_tags"
-MC_KEY_POSTS_BY_TAG = 'core:posts_by_tags:{}:{}' 
-MC_KEY_POST_COUNT_BY_TAG = 'core:count_by_tags:{}' 
+MC_KEY_POSTS_BY_TAG = "core:posts_by_tags:{}:{}"
+MC_KEY_POST_COUNT_BY_TAG = "core:count_by_tags:{}"
 HERE = pathlib.Path(__file__).resolve()
 
 
@@ -107,16 +108,21 @@ class PostTag(BaseMixin, db.Model):
         return query
 
     @classmethod
-    @cache(MC_KEY_POSTS_BY_TAG.format('{identifier}', '{page}'))
+    @cache(MC_KEY_POSTS_BY_TAG.format("{identifier}", "{page}"))
     def get_post_by_tag(cls, identifier, page=1):
         query = cls._get_post_by_tag(identifier)
         posts = query.paginate(page, PER_PAGE)
-        del posts.query # Fix `TypeError: can't pickle _thread.lock objects`
+        del posts.query  # Fix `TypeError: can't pickle _thread.lock objects`
         return posts
 
     @classmethod
-    def update_multi(cls, post_id, tags):
+    @cache(MC_KEY_POSTS_BY_TAG.format("{identifier}"))
+    def get_count_by_tag(cls, identifier):
+        query = cls._get_post_by_tag(identifier)
+        return query.count()
 
+    @classmethod
+    def update_multi(cls, post_id, tags):
         origin_tags = Post.get(post_id).tags
         need_add = set()
         need_del = set()
@@ -144,3 +150,33 @@ class PostTag(BaseMixin, db.Model):
             cls.create(post_id=post_id, tag_id=tag_id)
         db.session.commit()
 
+    @staticmethod
+    def clear_mc(target, amount):
+        post_id = target.post_id
+        tag_name = Tag.get(target.tag_id).name
+        for ident in (post_id, tag_name):
+            total = int(PostTag.get_count_by_tag(ident))
+            rdb.incr(MC_KEY_POST_COUNT_BY_TAG.format(ident), amount)
+            pages = math.ceil((max(total, 0) or 1) / PER_PAGE)
+            for p in range(1, pages + 1):
+                rdb.delete(MC_KEY_POSTS_BY_TAG.format(ident, p))
+
+    @staticmethod
+    def _flush_insert_event(mapper, connection, target):
+        super()._flush_insert_event(mapper, connection, target)
+        target.clear_mc(target, 1)
+
+    @staticmethod
+    def _flush_before_update_event(mapper, connection, target):
+        super()._flush_before_update_event(mapper, connection, target)
+        target.clear_mc(target, -1)
+
+    @staticmethod
+    def _flush_after_update_event(mapper, connection, target):
+        super()._flush_after_update_event(mapper, connection, target)
+        target.clear_mc(target, 1)
+
+    @staticmethod
+    def _flush_delete_event(mapper, connection, target):
+        super()._flush_delete_event(mapper, connection, target)
+        target.clear_mc(target, -1)

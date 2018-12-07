@@ -16,13 +16,13 @@ roles_users = db.Table(
 
 class User(db.Model, UserMixin, BaseMixin):
     __tablename__ = "users"
-    intro = db.Column(db.String(128), default="")
+    bio = db.Column(db.String(128), default="")
     name = db.Column(db.String(128), default="")
     nickname = db.Column(db.String(128), default="")
     email = db.Column(db.String(191), default="")
     password = db.Column(db.String(191))
     website = db.Column(db.String(191), default="")
-    github_url = db.Column(db.String(191), default="")
+    github_id = db.Column(db.String(191), default="")
     last_login_at = db.Column(db.DateTime())
     current_login_at = db.Column(db.DateTime())
     last_login_ip = db.Column(db.String(100))
@@ -51,16 +51,12 @@ class User(db.Model, UserMixin, BaseMixin):
         self.avatar_id = avatar_id
         self.save()
 
-    def upload_avatar(self, avatar_url):
+    def upload_avatar(self, img):
         avatar_id = generate_id()
         filename = UPLOAD_FOLDER / "avatars" / f"{avatar_id}.png"
-        r = requests.get(avatar_id, stream=True)
-        if r.status_code == 200:
-            with open(filename, "wb") as f:
-                for chunk in r.iter_content(1024):
-                    f.write(chunk)
-            self.avatar_id = avatar_id
-            self.save()
+        with open(filename, 'wb') as f:
+            img.save(f)
+        self.update_avatar(avatar_id)
 
 
 class Role(db.Model, RoleMixin):

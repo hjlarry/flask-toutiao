@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}{{ tag.name }} - 头条{% endblock %}
+
+{% block head %}
+{{ super() }}
+  <script src="{{url_for('static', filename='dist/tag.js')}}"></script>
+{% endblock %}
+
+{% block content %}
+  <h3 class="tag-name text-center">{{ tag.name }}</h3>
+  {% for post in posts.items %}
+    {{ macros.card(post) }}
+  {% endfor %}
+  {# {{ macros.render_pagination(posts, 'index.tag', ident) }} #}
+{% endblock %}

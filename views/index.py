@@ -1,8 +1,8 @@
 from flask.blueprints import Blueprint
-from flask import render_template, send_from_directory
+from flask import render_template, send_from_directory, abort, request
 from flask_security import current_user
 
-from models.core import Post
+from models.core import Post, Tag, PostTag
 from config import UPLOAD_FOLDER
 
 bp = Blueprint("index", __name__)
@@ -20,6 +20,15 @@ def avatars(path):
 
 @bp.route("/post/<int:id>")
 def post(id):
-    post = Post.get(id)
+    post = Post.get_or_404(id)
     return render_template("post.html", post=post)
 
+@bp.route('/tags/<identifier>')
+def tag(identifier):
+    identifier = identifier.lower()
+    tag = Tag.get_by_name(identifier)
+    if not tag:
+        tag = Tag.get_or_404(identifier)
+    page = request.args.get('page', type=int, default=1)
+    posts = PostTag.get_post_by_tag(identifier, page)
+    return render_template('tag.html', tag=tag, identifier=identifier, posts=posts)

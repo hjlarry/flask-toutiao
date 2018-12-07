@@ -12,6 +12,7 @@ from sqlalchemy.orm.interfaces import MapperOption
 from flask_security import Security
 from flask_mail import Mail
 from flask_debugtoolbar import DebugToolbarExtension
+from flask import abort
 
 from config import REDIS_URL
 from corelib.db import PropsMixin, PropsItem 
@@ -250,6 +251,13 @@ class BaseModel(PropsMixin, Model):
     @classmethod
     def get(cls, id):
         return cls.query.get(id)
+
+    @classmethod
+    def get_or_404(cls, id):
+        rv = cls.get(id)
+        if rv is None:
+            abort(404)
+        return rv
 
     @classmethod
     def get_multi(cls, ids):

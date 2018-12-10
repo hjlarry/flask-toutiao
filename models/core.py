@@ -1,5 +1,6 @@
 import pathlib
 import math
+from urllib.parse import urlparse
 
 from ext import db
 from corelib.db import PropsItem
@@ -59,6 +60,10 @@ class Post(BaseMixin, CommentMixin, db.Model):
     @cached_hybrid_property
     def author(self):
         return User.get(self.author_id)
+
+    @cached_hybrid_property
+    def orig_netloc(self):
+        return urlparse(self.orig_url).netloc
 
     @classmethod
     def create_or_update(cls, **kwargs):

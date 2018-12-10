@@ -3,6 +3,7 @@ from flask import render_template, send_from_directory, abort, request, url_for
 from flask_security import current_user
 
 from models.core import Post, Tag, PostTag
+from models.search import Item
 from config import UPLOAD_FOLDER
 
 bp = Blueprint("index", __name__)
@@ -39,3 +40,5 @@ def tag(identifier):
 def search():
     query = request.args.get("q", "")
     page = request.args.get("page", default=1, type=int)
+    posts = Item.new_search(query, page)
+    return render_template("search.html", query=query, posts=posts)

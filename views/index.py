@@ -34,3 +34,8 @@ def tag(identifier):
     posts = PostTag.get_post_by_tag(identifier, page)
     return render_template("tag.html", tag=tag, identifier=identifier, posts=posts)
 
+
+@bp.route("/search")
+def search():
+    query = request.args.get("q", "")
+    page = request.args.get("page", default=1, type=int)

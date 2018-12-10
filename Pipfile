@@ -15,7 +15,8 @@ pymysql = "*"
 feedparser = "*"
 bcrypt = "*"
 flask-debugtoolbar = "*"
+elasticsearch-dsl = "*"
 
 [dev-packages]
 pylint = "*"
-black = "*"
+

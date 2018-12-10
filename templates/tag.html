@@ -5,13 +5,16 @@
 
 {% block head %}
 {{ super() }}
-  <script src="{{url_for('static', filename='dist/tag.js')}}"></script>
+<script src="{{url_for('static', filename='dist/tag.js')}}"></script>
 {% endblock %}
 
 {% block content %}
-  <h3 class="tag-name text-center">{{ tag.name }}</h3>
-  {% for post in posts.items %}
-    {{ macros.card(post) }}
-  {% endfor %}
+<h3 class="tag-name text-center">{{ tag.name }}</h3>
+{% for post in posts.items %}
+{{ macros.card(post) }}
+{% endfor %}
+<div class="bottom_page">
   {{ macros.render_pagination(posts, 'index.tag', identifier) }}
+</div>
+
 {% endblock %}

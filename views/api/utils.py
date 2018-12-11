@@ -31,3 +31,27 @@ class ApiFlask(Flask):
             return receive.to_response()
 
         return Flask.make_response(self, receive)
+
+
+def marshal(data, schema):
+    if isinstance(data, (list, tuple)):
+        return filter(None, [marshal(d, schema) for d in data])
+
+    result, errors = schema.dump(data)
+    if errors:
+        for item in errors.items():
+            print("{}: {}".format(*item))
+    return result
+
+
+class marshal_with:
+    def __init__(self, schema_cls):
+        self.schema = schema_cls()
+
+    def __call__(self, fn):
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            resp = fn(*args, **kwargs)
+            return marshal(resp, self.schema)
+
+        return wrapper

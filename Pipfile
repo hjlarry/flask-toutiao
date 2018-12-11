@@ -16,7 +16,7 @@ feedparser = "*"
 bcrypt = "*"
 flask-debugtoolbar = "*"
 elasticsearch-dsl = "*"
+marshmallow = "*"
 
 [dev-packages]
 pylint = "*"
-

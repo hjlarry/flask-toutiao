@@ -6,6 +6,7 @@ from models.core import Post
 from models.user import user_datastore
 
 from .utils import ApiFlask, ApiResult
+from .exceptions import ApiException, httperrors
 
 
 def create_app():
@@ -19,7 +20,35 @@ def create_app():
 json_api = create_app()
 
 
+@json_api.errorhandler(ApiException)
+def api_error_handler(error):
+    return error.to_result()
+
+
+@json_api.errorhandler(401)
+@json_api.errorhandler(403)
 @json_api.errorhandler(404)
+@json_api.errorhandler(500)
 def error_handler(error):
-    return ApiResult({"r": 1})
+    if hasattr(error, "name"):
+        status = error.code
+        if status == 403:
+            msg = "无权限"
+        else:
+            msg = error.name
+    else:
+        msg = error.msg
+        status = 500
+    return ApiResult({"errmsg": msg, "r": 1, "status": status})
+
+
+class ActionApi(MethodView):
+    do_action = None
+    undo_action = None
+
+    def _prepare(self, post_id):
+        post = Post.get(post_id)
+        if not post:
+            raise ApiException(httperrors.post_not_found.value)
+        return post
 

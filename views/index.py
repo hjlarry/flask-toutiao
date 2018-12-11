@@ -25,7 +25,7 @@ def post(identifier):
     return render_template("post.html", post=post)
 
 
-@bp.route("/tags/<identifier>")
+@bp.route("/tag/<identifier>")
 def tag(identifier):
     identifier = identifier.lower()
     tag = Tag.get_by_name(identifier)

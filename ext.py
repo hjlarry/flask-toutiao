@@ -264,7 +264,7 @@ class BaseModel(PropsMixin, Model):
         return [cls.get(id) for id in ids]
 
     def url(self):
-        return f"/{self.__class__.__name__.lower()}/{self.id}/"
+        return f"/{self.__class__.__name__.lower()}/{self.id}"
 
     def to_dict(self):
         columns = self.__table__.columns.keys() + ["kind"]

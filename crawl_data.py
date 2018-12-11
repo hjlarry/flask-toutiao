@@ -4,7 +4,8 @@ from html.parser import HTMLParser
 import feedparser
 
 from app import app
-from models.core import Post
+from models.core import Post, Tag, PostTag, db
+from models.search import Item
 
 
 class MLStripper(HTMLParser):
@@ -31,7 +32,7 @@ def strip_tags(html):
 def fetch(url):
     d = feedparser.parse(url)
     entries = d.entries
-    print(len(entries))
+    posts = []
 
     for entry in entries:
         try:
@@ -50,7 +51,7 @@ def fetch(url):
             tags = []
 
         try:
-            ok, _ = Post.create_or_update(
+            ok, post = Post.create_or_update(
                 author_id=2,
                 title=entry.title,
                 orig_url=entry.link,
@@ -58,12 +59,19 @@ def fetch(url):
                 created_at=created_at,
                 tags=[tag.term for tag in tags],
             )
+            if ok:
+                Item.add(post)
         except Exception as e:
-            print(e)
+            raise e
 
 
 def main():
     with app.test_request_context():
+        # Item._index.delete(ignore=404)
+        # Item.init()
+        # db.session.commit()
+        # for model in (Post, Tag, PostTag):
+        #     model.query.delete()
         fetch("http://www.dongwm.com/atom.xml")
 
 

@@ -1,5 +1,6 @@
 import pathlib
 import math
+import redis
 from urllib.parse import urlparse
 
 from ext import db
@@ -68,7 +69,7 @@ class Post(BaseMixin, CommentMixin, db.Model):
     @classmethod
     def create_or_update(cls, **kwargs):
         tags = kwargs.pop("tags", [])
-        created, obj = super().create_or_update(**kwargs)
+        created, obj = super(Post, cls).create_or_update(**kwargs)
         if tags:
             PostTag.update_multi(obj.id, tags)
         return created, obj
@@ -161,27 +162,31 @@ class PostTag(BaseMixin, db.Model):
         tag_name = Tag.get(target.tag_id).name
         for ident in (post_id, tag_name):
             total = int(PostTag.get_count_by_tag(ident))
-            rdb.incr(MC_KEY_POST_COUNT_BY_TAG.format(ident), amount)
+            try:
+                rdb.incr(MC_KEY_POST_COUNT_BY_TAG.format(ident), amount)
+            except redis.exceptions.ResponseError:
+                rdb.delete(MC_KEY_POST_COUNT_BY_TAG.format(ident))
+                rdb.incr(MC_KEY_POST_COUNT_BY_TAG.format(ident), amount)
             pages = math.ceil((max(total, 0) or 1) / PER_PAGE)
             for p in range(1, pages + 1):
                 rdb.delete(MC_KEY_POSTS_BY_TAG.format(ident, p))
 
     @staticmethod
     def _flush_insert_event(mapper, connection, target):
-        super()._flush_insert_event(mapper, connection, target)
+        super(PostTag, target)._flush_insert_event(mapper, connection, target)
         target.clear_mc(target, 1)
 
     @staticmethod
     def _flush_before_update_event(mapper, connection, target):
-        super()._flush_before_update_event(mapper, connection, target)
+        super(PostTag, target)._flush_before_update_event(mapper, connection, target)
         target.clear_mc(target, -1)
 
     @staticmethod
     def _flush_after_update_event(mapper, connection, target):
-        super()._flush_after_update_event(mapper, connection, target)
+        super(PostTag, target)._flush_after_update_event(mapper, connection, target)
         target.clear_mc(target, 1)
 
     @staticmethod
     def _flush_delete_event(mapper, connection, target):
-        super()._flush_delete_event(mapper, connection, target)
+        super(PostTag, target)._flush_delete_event(mapper, connection, target)
         target.clear_mc(target, -1)

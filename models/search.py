@@ -17,6 +17,27 @@ SERACH_FIELDS = ["title^10", "tags^5", "content^2"]
 TARGET_MAPPER = {K_POST: Post}
 
 
+def get_item_data(item):
+    try:
+        content = item.content
+    except AttributeError:
+        content = ""
+    try:
+        tags = [tag.name for tag in item.tags]
+    except AttributeError:
+        tags = []
+    return {
+        "id": item.id,
+        "tags": tags,
+        "content": content,
+        "title": item.title,
+        "kind": item.kind,
+        # "n_likes": item.n_likes,
+        # "n_comments": item.n_comments,
+        # "n_collects": item.n_collects,
+    }
+
+
 class Item(Document):
     title = Text()
     kind = Integer()
@@ -36,6 +57,17 @@ class Item(Document):
         return super().get(f"{id}_{kind}")
 
     @classmethod
+    def add(cls, item):
+        obj = cls(**get_item_data(item))
+        obj.save()
+        obj.clear_mc(item.id, item.kind)
+        return obj
+
+    @classmethod
+    def clear_mc(cls, id, kind):
+        rdb.delete(ITEM_MC_KEY.format(id, kind))
+
+    @classmethod
     def new_search(cls, query, page, order_by=None, per_page=PER_PAGE):
         s = cls.search()
         s = s.query("multi_match", query=query, fields=SERACH_FIELDS)
@@ -52,7 +84,7 @@ class Item(Document):
             target_cls = TARGET_MAPPER.get(kind)
             if target_cls:
                 items_ = target_cls.get_multi(ids)
-                items.extends(items_)
+                items.extend(items_)
 
         return Pagination(query, page, per_page, rs.hits.total, items)
 

@@ -1,6 +1,7 @@
 import re
 import inspect
 import functools
+from pickle import UnpicklingError
 
 from sqlalchemy.ext.serializer import loads, dumps
 
@@ -88,8 +89,10 @@ def cache(key_pattern, expire=None):
                 if r is not None:
                     r = dumps(r)
                     rdb.set(key, r, expire)
-
-            r = loads(r)
+            try:
+                r = loads(r)
+            except (TypeError, UnpicklingError):
+                pass
             if isinstance(r, Empty):
                 r = None
             return r

@@ -1,3 +1,5 @@
+import pathlib
+import pickle
 from datetime import datetime
 from html.parser import HTMLParser
 
@@ -30,7 +32,14 @@ def strip_tags(html):
 
 
 def fetch(url):
-    d = feedparser.parse(url)
+    metafile = pathlib.Path("test.data")
+    if not metafile.exists():
+        d = feedparser.parse(url)
+        with open(metafile, "wb") as f:
+            pickle.dump(d, f)
+    else:
+        with open(metafile, "rb") as f:
+            d = pickle.load(f)
     entries = d.entries
     posts = []
 
@@ -60,18 +69,19 @@ def fetch(url):
                 tags=[tag.term for tag in tags],
             )
             if ok:
-                Item.add(post)
+                posts.append(post)
         except Exception as e:
             raise e
+    Item.bulk_update(posts, op_type="create")
 
 
 def main():
     with app.test_request_context():
-        # Item._index.delete(ignore=404)
-        # Item.init()
-        # db.session.commit()
-        # for model in (Post, Tag, PostTag):
-        #     model.query.delete()
+        Item._index.delete(ignore=404)
+        Item.init()
+        for model in (Post, Tag, PostTag):
+            model.query.delete()
+        db.session.commit()
         fetch("http://www.dongwm.com/atom.xml")
 
 

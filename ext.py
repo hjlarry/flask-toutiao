@@ -267,8 +267,8 @@ class BaseModel(PropsMixin, Model):
         return f"/{self.__class__.__name__.lower()}/{self.id}/"
 
     def to_dict(self):
-        columns = self.__table__.columns.keys()
-        return {key: getattr(self, key) for key in columns}
+        columns = self.__table__.columns.keys() + ["kind"]
+        return {key: getattr(self, key, None) for key in columns}
 
     @staticmethod
     def _flush_event(mapper, connection, target):

@@ -1,32 +1,16 @@
 from ext import db
-from models.mixin import BaseMixin
-from corelib.mc import cache, rdb
-
-MC_KEY_COLLECT_N = "collect_n:{}:{}"
+from models.mixin import ActionMixin
 
 
-class CollectItem(BaseMixin, db.Model):
+class CollectItem(ActionMixin, db.Model):
     __tablename__ = "collect_items"
     user_id = db.Column(db.Integer)
     target_id = db.Column(db.Integer)
     target_kind = db.Column(db.Integer)
 
+    action_type = "collect"
+
     __table_args__ = (db.Index("idx_ti_tk_ui", target_id, target_kind, user_id),)
-
-    @classmethod
-    def __flush_event__(cls, target):
-        rdb.delete(MC_KEY_COLLECT_N.format(target.target_id, target.target_kind))
-
-    @classmethod
-    @cache(MC_KEY_COLLECT_N.format("{target_id}", "{target_kind}"))
-    def get_count_by_target(cls, target_id, target_kind):
-        return cls.query.filter_by(target_id=target_id, target_kind=target_kind).count()
-
-    @classmethod
-    def get_by_target(cls, user_id, target_id, target_kind):
-        return cls.query.filter_by(
-            user_id=user_id, target_id=target_id, target_kind=target_kind
-        ).first()
 
 
 class CollectMixin:
@@ -48,3 +32,6 @@ class CollectMixin:
     @property
     def n_collects(self):
         return CollectItem.get_count_by_target(self.id, self.kind)
+
+    def is_collected_by(self, user_id):
+        return CollectItem.is_action_by(user_id, self.id, self.kind)

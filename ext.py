@@ -296,6 +296,22 @@ class BaseModel(PropsMixin, Model):
         target._flush_event(mapper, connection, target)
 
     @classmethod
+    def _flush_insert_event(cls, target):
+        pass
+
+    @classmethod
+    def _flush_before_update_event(cls, target):
+        pass
+
+    @classmethod
+    def _flush_after_update_event(cls, target):
+        pass
+
+    @classmethod
+    def _flush_delete_event(cls, target):
+        pass
+
+    @classmethod
     def __declare_last__(cls):
         event.listen(cls, "after_insert", cls._flush_insert_event)
         event.listen(cls, "before_update", cls._flush_before_update_event)

@@ -1,6 +1,17 @@
+import math
+import redis
 from datetime import datetime
 
 from ext import db
+from config import PER_PAGE
+from corelib.mc import cache, rdb
+
+# action_type, target_id, target_kind
+MC_KEY_STATS_N = "action_n:{}:{}:{}"
+# action_type, target_id, target_kind, page
+MC_KEY_ACTION_ITEMS = "action_items:{}:{}:{}:{}"
+# action_type, user_id, target_id, target_kind
+MC_KEY_ACTION_ITEM_BY_USER = "action_item_by_user:{}:{}:{}:{}"
 
 
 class BaseMixin:
@@ -52,7 +63,7 @@ class BaseMixin:
 
     @classmethod
     def update_db_props(cls, obj, db_props):
-        for prop,value in db_props.items():
+        for prop, value in db_props.items():
             obj.set_props_item(prop, value)
 
     def save(self):
@@ -62,3 +73,87 @@ class BaseMixin:
     def delte(self):
         db.session.delete(self)
         db.session.commit()
+
+
+class ActionMixin(BaseMixin):
+    action_type = None
+
+    @classmethod
+    @cache(MC_KEY_STATS_N.format("{cls.action_type}", "{target_id}", "{target_kind}"))
+    def get_count_by_target(cls, target_id, target_kind):
+        return cls.query.filter_by(target_id=target_id, target_kind=target_kind).count()
+
+    @classmethod
+    @cache(
+        MC_KEY_ACTION_ITEM_BY_USER.format(
+            "{cls.action_type}", "{user_id}", "{target_id}", "{target_kind}"
+        )
+    )
+    def get_by_target(cls, user_id, target_id, target_kind):
+        return cls.query.filter_by(
+            user_id=user_id, target_id=target_id, target_kind=target_kind
+        ).first()
+
+    @classmethod
+    @cache(
+        MC_KEY_ACTION_ITEMS.format(
+            "{cls.action_type}", "{target_id}", "{target_kind}", "{page}"
+        )
+    )
+    def get_items_by_target(cls, target_id, target_kind, page=1):
+        query = cls.query.filter_by(
+            target_id=target_id, target_kind=target_kind
+        ).order_by(cls.id.desc())
+        if page is None:
+            items = query.all()
+        else:
+            items = query.limit(PER_PAGE).offset(page * PER_PAGE * (page - 1))
+        return items
+
+    @classmethod
+    def is_action_by(cls, user_id, target_id, target_kind):
+        return bool(cls.get_by_target(user_id, target_id, target_kind))
+
+    @classmethod
+    def _flush_insert_event(cls, target):
+        super()._flush_insert_event(target)
+        target.clear_mc(target, 1)
+
+    @classmethod
+    def _flush_before_update_event(cls, target):
+        super()._flush_before_update_event(target)
+        target.clear_mc(target, -1)
+
+    @classmethod
+    def _flush_after_update_event(cls, target):
+        super()._flush_after_update_event(target)
+        target.clear_mc(target, 1)
+
+    @classmethod
+    def _flush_delete_event(cls, target):
+        super()._flush_delete_event(target)
+        target.clear_mc(target, -1)
+
+    @classmethod
+    def clear_mc(cls, target, amount):
+        action_type = cls.action_type
+        target_id = target.target_id
+        target_kind = target.target_kind
+        user_id = target.user_id
+        stat_key = MC_KEY_STATS_N.format(action_type, target_id, target_kind)
+
+        try:
+            total = rdb.incr(stat_key, amount)
+        except redis.exceptions.ResponseError:
+            rdb.delete(stat_key)
+            total = rdb.incr(stat_key, amount)
+        rdb.delete(
+            MC_KEY_ACTION_ITEM_BY_USER.format(
+                action_type, user_id, target_id, target_kind
+            )
+        )
+        pages = math.ceil((max(total, 0) or 1) / PER_PAGE)
+        for p in list(range(1, pages + 1)) + [None]:
+            rdb.delete(
+                MC_KEY_ACTION_ITEMS.format(action_type, target_id, target_kind, p)
+            )

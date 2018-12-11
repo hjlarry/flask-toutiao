@@ -7,10 +7,11 @@ from ext import db
 from corelib.db import PropsItem
 from corelib.mc import rdb, cache
 from corelib.utils import cached_hybrid_property, is_numeric, trunc_utf8
-
 from .mixin import BaseMixin
 from .consts import K_POST
 from .comment import CommentMixin
+from .like import LikeMixin
+from .collect import CollectMixin
 from .user import User
 
 PER_PAGE = 10
@@ -20,7 +21,7 @@ MC_KEY_POST_COUNT_BY_TAG = "core:count_by_tags:{}"
 HERE = pathlib.Path(__file__).resolve()
 
 
-class Post(BaseMixin, CommentMixin, db.Model):
+class Post(BaseMixin, CommentMixin, LikeMixin, CollectMixin, db.Model):
     __tablename__ = "posts"
     author_id = db.Column(db.Integer)
     title = db.Column(db.String(128), default="")
@@ -30,9 +31,6 @@ class Post(BaseMixin, CommentMixin, db.Model):
     kind = K_POST
 
     __table_args__ = (db.Index("idx_title", title),)
-
-    def url(self):
-        return f"/{self.__class__.__name__.lower()}/{self.id or self.title}"
 
     @classmethod
     def __flush_event__(cls, target):

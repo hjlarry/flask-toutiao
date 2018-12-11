@@ -1,9 +1,11 @@
 from flask import render_template
 from flask_security import current_user
+from werkzeug.wsgi import DispatcherMiddleware
 
 import config
 from views.index import bp as index_bp
 from views.account import bp as account_bp
+from views.api.api_app import json_api
 from corelib.exmail import send_mail
 from corelib.flask_ import Flask
 from ext import db, security, mail, debug_bar
@@ -17,6 +19,7 @@ def create_app():
     init_app(app)
     register_bp(app)
     app.context_processor(inject_template_global)
+    app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {"/api": json_api})
 
     @app.teardown_request
     def teardown_request(exception):

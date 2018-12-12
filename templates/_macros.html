@@ -90,3 +90,14 @@
   </ul>
 </nav>
 {% endmacro %}
+
+{% macro render_comment(comment) %}
+{% set user=request.user %}
+<div class="comment media">
+  <a class="media-left" href="{{user.url()}}"><img src="{{user.avatar_path}}" alt="Thumb"></a>
+  <div class="media-body">
+    <h4 class="media-heading">{{user.name}} <small class="date">{{comment.created_at}}</small></h4>
+    <div>{{comment.content}}</div>
+  </div>
+</div>
+{% endmacro %}

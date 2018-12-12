@@ -30,21 +30,28 @@
 </div>
 <div class="post-comment-form">
   <span>评论 (15)</span>
-
+  {% if not request.user %}
   <div class="login-actions">
-    <a class="btn btn-success" href="/signin">登录后评论</a>
+    <a class="btn btn-success" href="/login">登录后评论</a>
   </div>
+  {% else %}
+  <form id="comment-form" novalidate="novalidate" class="new_comment" data-url="post/{{ post.id }}/comment"
+    accept-charset="UTF-8" method="post">
+    <div class="form-group text required comment_content">
+      <textarea rows="5" class="text required comment-content form-control" id="comment-content">
+      </textarea>
+    </div>
+    <div class="text-right">
+      <input type="submit" id="comment-submit" name="commit" value="提 交" class="btn btn-default btn-info">
+    </div>
+  </form>
+  {% endif %}
 </div>
 
 <div id="comments" class="comments">
-  <div class="comment media">
-    <a class="media-left" href="/u/127127"><img src="https://img.toutiao.io/user/695893d4dd314e34a41fea38ef90ae75/thumb"
-        alt="Thumb"></a>
-    <div class="media-body">
-      <h4 class="media-heading">u369511 <small class="date">2018-01-15 10:24</small></h4>
-      <div>多年以前在github上，有一个日本的做过</div>
-    </div>
-  </div>
+  {% for comment in post.get_comments(None)%}
+  {{macros.render_comment(comment)}}
+  {% endfor %}
 </div>
 
 {% endblock %}

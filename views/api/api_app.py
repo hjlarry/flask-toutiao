@@ -62,7 +62,14 @@ class ActionApi(MethodView):
     @marshal_with(PostSchema)
     def post(self, post_id):
         post = self._prepare(post_id)
-        ok = getattr(post, self.do_action)(request.user_id)
+        if self.do_action == "add_comment":
+            content = request.form.get("content")
+            ok, comment = getattr(post, self.do_action)(request.user_id, content)
+            if ok:
+                macro = get_template_attribute("_macros.html", "render_comment")
+                return {"html": str(macro(comment).replace("\n\r", ""))}
+        else:
+            ok = getattr(post, self.do_action)(request.user_id)
         if not ok:
             raise ApiException(httperrors.illegal_state.value)
         return self._merge(post)
@@ -70,7 +77,11 @@ class ActionApi(MethodView):
     @marshal_with(PostSchema)
     def delete(self, post_id):
         post = self._prepare(post_id)
-        ok = getattr(post, self.undo_action)(request.user_id)
+        if self.undo_action == "del_comment":
+            comment_id = request.form.get("comment_id")
+            ok = getattr(post, self.undo_action)(request.user_id, comment_id)
+        else:
+            ok = getattr(post, self.undo_action)(request.user_id)
         if not ok:
             raise ApiException(httperrors.illegal_state.value)
         return self._merge(post)
@@ -86,7 +97,16 @@ class CollectApi(ActionApi):
     undo_action = "uncollect"
 
 
-for name, view_cls in (("like", LikeApi), ("collect", CollectApi)):
+class CommentApi(ActionApi):
+    do_action = "add_comment"
+    undo_action = "del_comment"
+
+
+for name, view_cls in (
+    ("like", LikeApi),
+    ("collect", CollectApi),
+    ("comment", CommentApi),
+):
     view = view_cls.as_view(name)
     json_api.add_url_rule(
         f"/post/<int:post_id>/{name}", view_func=view, methods=["POST", "DELETE"]

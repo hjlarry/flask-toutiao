@@ -6,8 +6,8 @@ from models.like import LikeMixin
 from models.mixin import ActionMixin
 
 
-class Comment(ActionMixin, LikeMixin, db.Model):
-    __tablename__ = "comments"
+class CommentItem(ActionMixin, LikeMixin, db.Model):
+    __tablename__ = "comment_items"
     user_id = db.Column(db.Integer)
     target_id = db.Column(db.Integer)
     target_kind = db.Column(db.Integer)
@@ -26,14 +26,19 @@ class Comment(ActionMixin, LikeMixin, db.Model):
 
 class CommentMixin:
     def add_comment(self, user_id, content, ref_id=None):
-        _, obj = Comment.create(
-            user_id=user_id, target_id=self.id, target_kind=self.kind, ref_id=ref_id
+        ok, obj = CommentItem.create(
+            user_id=user_id,
+            target_id=self.id,
+            target_kind=self.kind,
+            ref_id=ref_id,
+            content=content,
         )
-        obj.content = content
-        return True
+        if ok:
+            obj.content = content
+        return ok, obj
 
     def del_comment(self, user_id, comment_id):
-        comment = Comment.get(comment_id)
+        comment = CommentItem.get(comment_id)
         if (
             comment
             and comment.user_id == user_id
@@ -44,8 +49,8 @@ class CommentMixin:
             return True
         return False
 
-    def get_comments(self, page, per_page):
-        return self._get_comments(start=per_page * (page - 1), limit=per_page)
+    def get_comments(self, page):
+        return CommentItem.get_items_by_target(self.id, self.kind, page)
 
     @property
     def n_comments(self):

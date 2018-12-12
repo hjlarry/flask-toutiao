@@ -1,15 +1,16 @@
 {% macro card(post) %}
 {% set author = post.author %}
 {% set is_liked = post.is_liked_by(request.user_id) %}
+{% set is_collected = post.is_collected_by(request.user_id) %}
 <div class="post detail">
   <div class="btn-group-vertical upvote">
     <a id="like-button-{{ post.id }}" class="btn btn-default btn-xs like-button {% if is_liked %}liked{% endif %}" rel="nofollow"
       data-url="post/{{ post.id }}/like" data-original-title="点赞">
-      <i class="iconfont icon-dianzan"></i> <span>8</span>
+      <i class="iconfont icon-dianzan"></i> <span>{{post.n_likes}}</span>
     </a>
 
-    <a id="favorite-button-{{ post.id }}" class="btn btn-default btn-xs favorite-button" title="" data-remote="true"
-      rel="nofollow" data-method="post" href="/favorites/post/{{ post.id }}" data-original-title="收藏">
+    <a id="collect-button-{{ post.id }}" class="btn btn-default btn-xs collect-button {% if is_collected %}collected{% endif %}"
+      rel="nofollow" data-url="post/{{ post.id }}/collect" data-original-title="收藏">
       <i class="iconfont icon-shoucang"></i>
     </a>
   </div>

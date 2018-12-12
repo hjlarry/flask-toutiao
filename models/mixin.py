@@ -147,6 +147,11 @@ class ActionMixin(BaseMixin):
         except redis.exceptions.ResponseError:
             rdb.delete(stat_key)
             total = rdb.incr(stat_key, amount)
+        print(
+            MC_KEY_ACTION_ITEM_BY_USER.format(
+                action_type, user_id, target_id, target_kind
+            )
+        )
         rdb.delete(
             MC_KEY_ACTION_ITEM_BY_USER.format(
                 action_type, user_id, target_id, target_kind

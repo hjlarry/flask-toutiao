@@ -19,8 +19,10 @@ class CollectMixin:
         if item:
             return False
 
-        CollectItem.create(user_id=user_id, target_id=self.id, target_kind=self.kind)
-        return True
+        ok, _ = CollectItem.create(
+            user_id=user_id, target_id=self.id, target_kind=self.kind
+        )
+        return ok
 
     def uncollect(self, user_id):
         item = CollectItem.get_by_target(user_id, self.id, self.kind)

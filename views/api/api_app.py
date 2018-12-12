@@ -81,8 +81,14 @@ class LikeApi(ActionApi):
     undo_action = "unlike"
 
 
-view = LikeApi.as_view("like")
-json_api.add_url_rule(
-    f"/post/<int:post_id>/like", view_func=view, methods=["POST", "DELETE"]
-)
+class CollectApi(ActionApi):
+    do_action = "collect"
+    undo_action = "uncollect"
+
+
+for name, view_cls in (("like", LikeApi), ("collect", CollectApi)):
+    view = view_cls.as_view(name)
+    json_api.add_url_rule(
+        f"/post/<int:post_id>/{name}", view_func=view, methods=["POST", "DELETE"]
+    )
 

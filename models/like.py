@@ -31,7 +31,7 @@ class LikeMixin:
 
     @property
     def n_likes(self):
-        return LikeItem.get_count_by_target(self.id, self.kind)
+        return int(LikeItem.get_count_by_target(self.id, self.kind))
 
     def is_liked_by(self, user_id):
         return LikeItem.is_action_by(user_id, self.id, self.kind)

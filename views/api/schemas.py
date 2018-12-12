@@ -8,7 +8,7 @@ class PostSchema(Schema):
     n_collects = fields.Integer()
     is_liked = fields.Boolean()
     is_commented = fields.Boolean()
-    is_collects = fields.Boolean()
+    is_collected = fields.Boolean()
     html = fields.Str()
 
 

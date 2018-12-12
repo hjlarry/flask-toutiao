@@ -115,23 +115,23 @@ class ActionMixin(BaseMixin):
         return bool(cls.get_by_target(user_id, target_id, target_kind))
 
     @classmethod
-    def _flush_insert_event(cls, target):
-        super()._flush_insert_event(target)
+    def __flush_insert_event__(cls, target):
+        super().__flush_insert_event__(target)
         target.clear_mc(target, 1)
 
     @classmethod
-    def _flush_before_update_event(cls, target):
-        super()._flush_before_update_event(target)
+    def __flush_before_update_event__(cls, target):
+        super().__flush_before_update_event__(target)
         target.clear_mc(target, -1)
 
     @classmethod
-    def _flush_after_update_event(cls, target):
-        super()._flush_after_update_event(target)
+    def __flush_after_update_event__(cls, target):
+        super().__flush_after_update_event__(target)
         target.clear_mc(target, 1)
 
     @classmethod
-    def _flush_delete_event(cls, target):
-        super()._flush_delete_event(target)
+    def __flush_delete_event__(cls, target):
+        super().__flush_delete_event__(target)
         target.clear_mc(target, -1)
 
     @classmethod

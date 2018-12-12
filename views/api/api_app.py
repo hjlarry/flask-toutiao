@@ -67,11 +67,22 @@ class ActionApi(MethodView):
             raise ApiException(httperrors.illegal_state.value)
         return self._merge(post)
 
+    @marshal_with(PostSchema)
+    def delete(self, post_id):
+        post = self._prepare(post_id)
+        ok = getattr(post, self.undo_action)(request.user_id)
+        if not ok:
+            raise ApiException(httperrors.illegal_state.value)
+        return self._merge(post)
+
 
 class LikeApi(ActionApi):
     do_action = "like"
     undo_action = "unlike"
 
+
 view = LikeApi.as_view("like")
-json_api.add_url_rule(f"/post/<int:post_id>/like", view_func=view, methods=["POST"])
+json_api.add_url_rule(
+    f"/post/<int:post_id>/like", view_func=view, methods=["POST", "DELETE"]
+)
 

@@ -70,7 +70,7 @@ class BaseMixin:
         db.session.add(self)
         db.session.commit()
 
-    def delte(self):
+    def delete(self):
         db.session.delete(self)
         db.session.commit()
 

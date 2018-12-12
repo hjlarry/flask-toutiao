@@ -282,18 +282,22 @@ class BaseModel(PropsMixin, Model):
     @staticmethod
     def _flush_insert_event(mapper, connection, target):
         target._flush_event(mapper, connection, target)
+        target.__flush_insert_event__(target)
 
     @staticmethod
     def _flush_before_update_event(mapper, connection, target):
         target._flush_event(mapper, connection, target)
+        target.__flush_before_update_event__(target)
 
     @staticmethod
     def _flush_after_update_event(mapper, connection, target):
         target._flush_event(mapper, connection, target)
+        target.__flush_after_update_event__(target)
 
     @staticmethod
     def _flush_delete_event(mapper, connection, target):
         target._flush_event(mapper, connection, target)
+        target.__flush_delete_event__(target)
 
     @classmethod
     def __flush_insert_event__(cls, target):

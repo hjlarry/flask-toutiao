@@ -143,6 +143,14 @@
             font-size: 12px;
         }
     }
+
+    .upvote a.liked,
+    .upvote a.collected {
+        border-left-color: #29afec;
+        border-right-color: #29afec;
+        background-color: #29afec;
+        color: #FFF !important;
+    }
 }
 
 .post:hover {

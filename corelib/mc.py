@@ -48,7 +48,6 @@ def format(text, *a, **kw):
     if f is None:
         f = formatter(text)
         __formaters[text] = f
-    print(__formaters)
     return f(*a, **kw)
 
 
@@ -92,7 +91,7 @@ def cache(key_pattern, expire=None):
                     rdb.set(key, r, expire)
             try:
                 r = loads(r)
-            except (TypeError, UnpicklingError):
+            except (TypeError, UnpicklingError, EOFError):
                 pass
             if isinstance(r, Empty):
                 r = None

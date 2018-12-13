@@ -5,6 +5,7 @@ from datetime import datetime
 from ext import db
 from config import PER_PAGE
 from corelib.mc import cache, rdb
+from .consts import K_POST
 
 # action_type, target_id, target_kind
 MC_KEY_STATS_N = "action_n:{}:{}:{}"
@@ -12,6 +13,8 @@ MC_KEY_STATS_N = "action_n:{}:{}:{}"
 MC_KEY_ACTION_ITEMS = "action_items:{}:{}:{}:{}"
 # action_type, user_id, target_id, target_kind
 MC_KEY_ACTION_ITEM_BY_USER = "action_item_by_user:{}:{}:{}:{}"
+# action_type, user_id, target_kind, page
+MC_KEY_ACTION_ITEMS_BY_USER = "action_items_by_user:{}:{}:{}:{}"
 
 
 class BaseMixin:
@@ -96,6 +99,21 @@ class ActionMixin(BaseMixin):
 
     @classmethod
     @cache(
+        MC_KEY_ACTION_ITEMS_BY_USER.format(
+            "{cls.action_type}", "{user_id}", "{target_kind}", "{page}"
+        )
+    )
+    def get_target_ids_by_user(cls, user_id, target_kind=K_POST, page=1):
+        query = cls.query.with_entities(cls.target_id).filter_by(
+            user_id=user_id, target_kind=target_kind
+        )
+        posts = query.paginate(page, PER_PAGE)
+        posts.items = [id for id, in posts.items]
+        del posts.query
+        return posts
+
+    @classmethod
+    @cache(
         MC_KEY_ACTION_ITEMS.format(
             "{cls.action_type}", "{target_id}", "{target_kind}", "{page}"
         )
@@ -152,8 +170,12 @@ class ActionMixin(BaseMixin):
                 action_type, user_id, target_id, target_kind
             )
         )
+
         pages = math.ceil((max(total, 0) or 1) / PER_PAGE)
         for p in list(range(1, pages + 1)) + [None]:
             rdb.delete(
                 MC_KEY_ACTION_ITEMS.format(action_type, target_id, target_kind, p)
+            )
+            rdb.delete(
+                MC_KEY_ACTION_ITEMS_BY_USER.format(action_type, user_id, target_kind, p)
             )

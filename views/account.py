@@ -3,6 +3,8 @@ from flask import render_template, abort, request
 from flask_security import login_required
 
 from models.user import User
+from models.core import Post
+from models.collect import CollectItem
 from corelib.utils import AttrDict
 
 
@@ -64,14 +66,9 @@ def user_likes(identifier):
     return render_template("user.html", user=user)
 
 
-@bp.route("user_favorites/<identifier>/")
-def user_favorites(identifier):
-    user = User.cache.get(identifier)
-    if not user:
-        user = User.cache.filter(name=identifier).first()
-    if not user:
-        abort(404)
-    return render_template("user.html", user=user)
+@bp.route("user/<identifier>/collect")
+def user_collects(identifier):
+    return render_user_page(identifier, "user_card.html", Post, "collect")
 
 
 @bp.route("user_following/<identifier>/")
@@ -82,3 +79,17 @@ def user_following(identifier):
     if not user:
         abort(404)
     return render_template("user.html", user=user)
+
+
+def render_user_page(identifier, template_file, target_cls, type="following"):
+    user = User.cache.get(identifier)
+    if not user:
+        user = User.cache.filter(name=identifier).first()
+    if not user:
+        abort(404)
+    page = request.args.get("page", default=1, type=int)
+    if type == "collect":
+        p = CollectItem.get_target_ids_by_user(user.id, page=page)
+
+    p.items = target_cls.get_multi(p.items)
+    return render_template(template_file, **locals())

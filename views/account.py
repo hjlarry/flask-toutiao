@@ -6,6 +6,7 @@ from models.user import User
 from models.core import Post
 from models.collect import CollectItem
 from models.like import LikeItem
+from models.contact import Contact
 from corelib.utils import AttrDict
 
 
@@ -30,17 +31,12 @@ def confirm_landing():
     return render_template("security/confirm_landing.html")
 
 
-@bp.route("user/<identifier>/")
+@bp.route("user/<identifier>")
 def user(identifier):
-    user = User.cache.get(identifier)
-    if not user:
-        user = User.cache.filter(name=identifier).first()
-    if not user:
-        abort(404)
-    return render_template("user.html", user=user)
+    return render_user_page(identifier, "user.html", User, endpoint="account.user")
 
 
-@bp.route("settings/", methods=["GET", "POST"])
+@bp.route("settings", methods=["GET", "POST"])
 @login_required
 def settings():
     notice = False
@@ -74,10 +70,12 @@ def user_collects(identifier):
 @bp.route("user_following/<identifier>/")
 def user_following(identifier):
     user = User.cache.get(identifier)
-    if not user:
-        user = User.cache.filter(name=identifier).first()
-    if not user:
-        abort(404)
+    return render_template("user.html", user=user)
+
+
+@bp.route("user_followers/<identifier>/")
+def user_followers(identifier):
+    user = User.cache.get(identifier)
     return render_template("user.html", user=user)
 
 
@@ -94,6 +92,8 @@ def render_user_page(
         p = CollectItem.get_target_ids_by_user(user.id, page=page)
     elif type == "like":
         p = LikeItem.get_target_ids_by_user(user.id, page=page)
+    elif type == "following":
+        p = Contact.get_following_ids(user.id, page=page)
 
     p.items = target_cls.get_multi(p.items)
     return render_template(template_file, **locals())

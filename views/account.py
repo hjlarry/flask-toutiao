@@ -52,3 +52,33 @@ def settings():
             user.upload_avatar(image)
         notice = True
     return render_template("settings.html", notice=notice)
+
+
+@bp.route("user_likes/<identifier>/")
+def user_likes(identifier):
+    user = User.cache.get(identifier)
+    if not user:
+        user = User.cache.filter(name=identifier).first()
+    if not user:
+        abort(404)
+    return render_template("user.html", user=user)
+
+
+@bp.route("user_favorites/<identifier>/")
+def user_favorites(identifier):
+    user = User.cache.get(identifier)
+    if not user:
+        user = User.cache.filter(name=identifier).first()
+    if not user:
+        abort(404)
+    return render_template("user.html", user=user)
+
+
+@bp.route("user_following/<identifier>/")
+def user_following(identifier):
+    user = User.cache.get(identifier)
+    if not user:
+        user = User.cache.filter(name=identifier).first()
+    if not user:
+        abort(404)
+    return render_template("user.html", user=user)

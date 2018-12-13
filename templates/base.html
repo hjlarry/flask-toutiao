@@ -19,7 +19,7 @@
   <body>
     <header class="navbar">
       <div class="container">
-        <ul class="nav">
+        <ul class="nav navbar-right">
           <li class="nav-item">
             <a class="nav-link active" href="/">首页</a>
           </li>
@@ -29,9 +29,27 @@
           <li class="nav-item">
             <a class="nav-link" href="/search">搜索</a>
           </li>
+          {% if request.user %}
+          <li class="dropdown profile">
+            <a href="" class="dropdown-toggle clear navbar-profile" data-toggle="dropdown" aria-expanded="true">
+              <span><img width="25" height="25" src="{{ request.user.avatar_path }}"></span> <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+              <li class="dropdown-item"><a href="{{ url_for('account.user_likes', identifier=request.user.id) }}">我的点赞</a></li>
+              <li class="dropdown-item"><a href="{{ url_for('account.user_favorites', identifier=request.user.id) }}">我的收藏</a></li>
+              <li class="dropdown-item"><a href="{{ url_for('account.user_following', identifier=request.user.id) }}">我的关注</a></li>
+              <li class="dropdown-item"><a href="{{ url_for('account.settings') }}">个人设置</a></li>
+              <li class="dropdown-item"><a href="/logout">退出</a></li>
+            </ul>
+          </li>
+          {% else %}
           <li class="nav-item">
             <a class="nav-link" href="/login">登录</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/register">注册</a>
+          </li>
+          {% endif %}
         </ul>
       </div>
     </header>

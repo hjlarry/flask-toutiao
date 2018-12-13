@@ -3,7 +3,7 @@
 
 {% block title %}{{ tag.name }} - 头条{% endblock %}
 
-{% block head %}
+{% block bottomscript %}
 {{ super() }}
 <script src="{{url_for('static', filename='dist/tag.js')}}"></script>
 {% endblock %}

@@ -68,7 +68,9 @@ def user_likes(identifier):
 
 @bp.route("user/<identifier>/collect")
 def user_collects(identifier):
-    return render_user_page(identifier, "user_card.html", Post, "collect")
+    return render_user_page(
+        identifier, "user_card.html", Post, "collect", "account.user_collects"
+    )
 
 
 @bp.route("user_following/<identifier>/")
@@ -81,7 +83,9 @@ def user_following(identifier):
     return render_template("user.html", user=user)
 
 
-def render_user_page(identifier, template_file, target_cls, type="following"):
+def render_user_page(
+    identifier, template_file, target_cls, type="following", endpoint=None
+):
     user = User.cache.get(identifier)
     if not user:
         user = User.cache.filter(name=identifier).first()

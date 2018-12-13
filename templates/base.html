@@ -38,6 +38,7 @@
               <li class="dropdown-item"><a href="{{ url_for('account.user_likes', identifier=request.user.id) }}">我的点赞</a></li>
               <li class="dropdown-item"><a href="{{ url_for('account.user_collects', identifier=request.user.id) }}">我的收藏</a></li>
               <li class="dropdown-item"><a href="{{ url_for('account.user_following', identifier=request.user.id) }}">我的关注</a></li>
+              <li class="dropdown-item"><a href="{{ url_for('account.user', identifier=request.user.id) }}">我的主页</a></li>
               <li class="dropdown-item"><a href="{{ url_for('account.settings') }}">个人设置</a></li>
               <li class="dropdown-item"><a href="/logout">退出</a></li>
             </ul>

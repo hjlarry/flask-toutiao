@@ -30,6 +30,14 @@ class Contact(BaseMixin, db.Model):
         del following.query
         return following
 
+    @classmethod
+    def get_follower_ids(cls, user_id, page=1):
+        query = cls.query.with_entities(cls.from_id).filter_by(to_id=user_id)
+        follower = query.paginate(page, PER_PAGE)
+        follower.items = [id for id, in follower.items]
+        del follower.query
+        return follower
+
 
 class userFollowStats(BaseMixin, db.Model):
     follower_count = db.Column(db.Integer, default=0)

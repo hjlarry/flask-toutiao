@@ -1,9 +1,10 @@
+import './follow';
 var $likeBtn = $('.like-button');
 var $collectBtn = $('.collect-button');
-var $followBtn = $('.follow-button');
+
 var $isLiked = $likeBtn.hasClass('liked');
 var $isCollected = $collectBtn.hasClass('collected');
-var $isFollowed = $followBtn.hasClass('followed');
+
 $likeBtn.on('click', (event) => {
     let $this = $(event.currentTarget);
     let url = $this.data('url');
@@ -52,32 +53,6 @@ $collectBtn.on('click', (event) => {
                 }
             } else {
                 alert('收藏失败，请稍后重试');
-            }
-        }
-    });
-})
-
-$followBtn.on('click', (event) => {
-    let $this = $(event.currentTarget);
-    let url = $this.data('url');
-    $.ajax({
-        url: `/api/${url}`,
-        type: $isFollowed ? 'DELETE' : 'POST',
-        data: {},
-        success: function (rs) {
-            if (!rs.r) {
-                let isFollowed = rs.data.is_followed;
-                if ($isFollowed != isFollowed) {
-                    $isFollowed = isFollowed;
-                    $this.toggleClass('followed');
-                    if ($isFollowed) {
-                        $this.text('已关注TA');
-                    } else {
-                        $this.text('关注TA');
-                    }
-                }
-            } else {
-                alert('关注失败，请稍后重试');
             }
         }
     });

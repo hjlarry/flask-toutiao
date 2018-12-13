@@ -53,30 +53,32 @@ def settings():
     return render_template("settings.html", notice=notice)
 
 
-@bp.route("user/<identifier>/like")
+@bp.route("user/<identifier>/likes")
 def user_likes(identifier):
     return render_user_page(
         identifier, "user_card.html", Post, "like", "account.user_likes"
     )
 
 
-@bp.route("user/<identifier>/collect")
+@bp.route("user/<identifier>/collects")
 def user_collects(identifier):
     return render_user_page(
         identifier, "user_card.html", Post, "collect", "account.user_collects"
     )
 
 
-@bp.route("user_following/<identifier>/")
+@bp.route("user/<identifier>/following")
 def user_following(identifier):
-    user = User.cache.get(identifier)
-    return render_template("user.html", user=user)
+    return render_user_page(
+        identifier, "user.html", User, "following", "account.user_following"
+    )
 
 
-@bp.route("user_followers/<identifier>/")
+@bp.route("user/<identifier>/followers")
 def user_followers(identifier):
-    user = User.cache.get(identifier)
-    return render_template("user.html", user=user)
+    return render_user_page(
+        identifier, "user.html", User, "follower", "account.user_followers"
+    )
 
 
 def render_user_page(
@@ -94,6 +96,8 @@ def render_user_page(
         p = LikeItem.get_target_ids_by_user(user.id, page=page)
     elif type == "following":
         p = Contact.get_following_ids(user.id, page=page)
+    elif type == "follower":
+        p = Contact.get_follower_ids(user.id, page=page)
 
     p.items = target_cls.get_multi(p.items)
     return render_template(template_file, **locals())

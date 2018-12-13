@@ -102,3 +102,24 @@
   </div>
 </div>
 {% endmacro %}
+
+{% macro render_user(user) %}
+<div class="media" id="follows-{{ user.id }}">
+  <div class="media-left">
+    <a href="{{ user.url() }}"><img width="48" height=48 class="media-object img-circle" alt="{{ user.name }} - 开发者头条"
+        src="{{ user.avatar_path }}"></a>
+  </div>
+
+  <div class="media-body">
+    <h4 class="media-heading m-b-xs">
+      <a title="{{ user.name }} - 开发者头条" href="{{ user.url() }}">{{ user.name }}</a>
+
+      <small class="pull-right" id="followers-{{ user.id }}-count">
+        <span>{{ user.n_followers }}</span><span>关注者</span>
+      </small>
+    </h4>
+
+    <div class="bio">{{ user.bio }}</div>
+  </div>
+</div>
+{% endmacro%}

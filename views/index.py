@@ -32,8 +32,17 @@ def tag(identifier):
     if not tag:
         tag = Tag.get_or_404(identifier)
     page = request.args.get("page", type=int, default=1)
-    posts = PostTag.get_post_by_tag(identifier, page)
-    return render_template("tag.html", tag=tag, identifier=identifier, posts=posts)
+    type = request.args.get("type", default="hot")
+    if type == "latest":
+        posts = PostTag.get_post_by_tag(identifier, page)
+    elif type == "hot":
+        posts = Item.get_post_ids_by_tag(tag, page)
+        posts.items = Post.get_multi(posts.items)
+    else:
+        posts = []
+    return render_template(
+        "tag.html", tag=tag, identifier=identifier, posts=posts, type=type
+    )
 
 
 @bp.route("/search")

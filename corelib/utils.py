@@ -4,6 +4,7 @@ import os
 import random
 import threading
 import binascii
+import urllib
 
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -62,6 +63,14 @@ def trunc_utf8(string, num, etc="..."):
     if etc:
         ret += etc
     return ret
+
+
+def update_url_query(url, params):
+    url_parts = list(urllib.parse.urlparse(url))
+    query = dict(urllib.parse.parse_qsl(url_parts[4]))
+    query.update(params)
+    url_parts[4] = urllib.parse.urlencode(query)
+    return urllib.parse.urlunparse(url_parts)
 
 
 class Empty:

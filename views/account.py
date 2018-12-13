@@ -5,6 +5,7 @@ from flask_security import login_required
 from models.user import User
 from models.core import Post
 from models.collect import CollectItem
+from models.like import LikeItem
 from corelib.utils import AttrDict
 
 
@@ -56,14 +57,11 @@ def settings():
     return render_template("settings.html", notice=notice)
 
 
-@bp.route("user_likes/<identifier>/")
+@bp.route("user/<identifier>/like")
 def user_likes(identifier):
-    user = User.cache.get(identifier)
-    if not user:
-        user = User.cache.filter(name=identifier).first()
-    if not user:
-        abort(404)
-    return render_template("user.html", user=user)
+    return render_user_page(
+        identifier, "user_card.html", Post, "like", "account.user_likes"
+    )
 
 
 @bp.route("user/<identifier>/collect")
@@ -94,6 +92,8 @@ def render_user_page(
     page = request.args.get("page", default=1, type=int)
     if type == "collect":
         p = CollectItem.get_target_ids_by_user(user.id, page=page)
+    elif type == "like":
+        p = LikeItem.get_target_ids_by_user(user.id, page=page)
 
     p.items = target_cls.get_multi(p.items)
     return render_template(template_file, **locals())

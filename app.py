@@ -8,6 +8,7 @@ from views.account import bp as account_bp
 from views.api.api_app import json_api
 from corelib.exmail import send_mail
 from corelib.flask_ import Flask
+from corelib.utils import update_url_query
 from ext import db, security, mail, debug_bar
 from forms import ExtendedRegisterForm, ExtendedLoginForm
 from models.user import user_datastore
@@ -62,6 +63,7 @@ def inject_template_global():
         "hasattr": hasattr,
         "dir": dir,
         "len": len,
+        "update_url_query": update_url_query,
     }
 
 

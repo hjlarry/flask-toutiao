@@ -1,22 +1,31 @@
 from collections import defaultdict
 
-from elasticsearch_dsl.connections import connections
-from elasticsearch_dsl import Document, Integer, Text, Boolean, Q, Keyword
-from elasticsearch.helpers import parallel_bulk
 from elasticsearch.exceptions import ConflictError
+from elasticsearch.helpers import parallel_bulk
+from elasticsearch_dsl import Boolean, Document, Integer, Keyword, Q, Text, SF, Date
+from elasticsearch_dsl.connections import connections
 from flask_sqlalchemy import Pagination
 
-from corelib.mc import cache, rdb
-from models.consts import K_POST
-from models.core import Post
 from config import ES_HOSTS, PER_PAGE
-
+from corelib.mc import cache, rdb
+from .consts import K_POST, ONE_HOUR
+from .core import Post
 
 connections.create_connection(hosts=ES_HOSTS)
 
-ITEM_MC_KEY = "core:search:{}:{}"
+MC_KEY_ITEM = "core:search:{}:{}"
+MC_KEY_POST_IDS_BY_TAG = "core:search:post_ids_by_tag:{}:{}:{}:{}"
 SERACH_FIELDS = ["title^10", "tags^5", "content^2"]
 TARGET_MAPPER = {K_POST: Post}
+
+gauss_sf = SF("gauss", created_at={"origin": "now", "offset": "7d", "scale": "10d"})
+score_sf = SF(
+    "script_score",
+    script={
+        "lang": "painless",
+        "inline": ("doc['n_likes'].value*2 +doc['n_collects'].value"),
+    },
+)
 
 
 def get_item_data(item):
@@ -34,13 +43,14 @@ def get_item_data(item):
         "content": content,
         "title": item.title,
         "kind": item.kind,
-        # "n_likes": item.n_likes,
-        # "n_comments": item.n_comments,
-        # "n_collects": item.n_collects,
+        "n_likes": item.n_likes,
+        "n_comments": item.n_comments,
+        "n_collects": item.n_collects,
     }
 
 
 class Item(Document):
+    id = Integer()
     title = Text()
     kind = Integer()
     content = Text()
@@ -49,12 +59,13 @@ class Item(Document):
     n_comments = Integer()
     can_show = Boolean()
     tags = Text(fields={"row": Keyword()})
+    created_at = Date()
 
     class Index:
         name = "test"
 
     @classmethod
-    @cache(ITEM_MC_KEY.format("{id}", "{kind}"))
+    @cache(MC_KEY_ITEM.format("{id}", "{kind}"))
     def get(cls, id, kind):
         return super().get(f"{id}_{kind}")
 
@@ -85,7 +96,7 @@ class Item(Document):
 
     @classmethod
     def clear_mc(cls, id, kind):
-        rdb.delete(ITEM_MC_KEY.format(id, kind))
+        rdb.delete(MC_KEY_ITEM.format(id, kind))
 
     @classmethod
     def delete(cls, item):
@@ -142,3 +153,21 @@ class Item(Document):
 
         return Pagination(query, page, per_page, rs.hits.total, items)
 
+    @classmethod
+    @cache(
+        MC_KEY_POST_IDS_BY_TAG.format("{tag}", "{page}", "{order_by}", "{per_page}"),
+        ONE_HOUR,
+    )
+    def get_post_ids_by_tag(cls, tag, page, order_by=None, per_page=PER_PAGE):
+        s = cls.search()
+        # s = s.query(Q("bool", must=Q("term", tags=tag)))
+        s = s.query(Q("bool", must=Q("term", kind=K_POST)))
+        start = (page - 1) * PER_PAGE
+        s = s.extra(**{"from": start, "size": per_page})
+        if order_by == "hot":
+            s = s.query(Q("function_score", functions=[gauss_sf, score_sf]))
+        else:
+            s = s.sort(order_by)
+        rs = s.execute()
+        ids = [obj.id for obj in rs]
+        return Pagination(tag, page, per_page, rs.hits.total, ids)

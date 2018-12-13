@@ -32,7 +32,7 @@ def tag(identifier):
     if not tag:
         tag = Tag.get_or_404(identifier)
     page = request.args.get("page", type=int, default=1)
-    type = request.args.get("type", default="hot")
+    type = request.args.get("type", default="latest")
     if type == "latest":
         posts = PostTag.get_post_by_tag(identifier, page)
     elif type == "hot":

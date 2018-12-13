@@ -56,6 +56,10 @@
         top: 10px;
         text-align: center;
 
+        &:hover .info {
+            display: block;
+        }
+
         .user-avatar {
             padding: 10px;
 
@@ -153,6 +157,6 @@
     }
 }
 
-.post:hover {
-    background-color: rgba(225, 227, 230, 0.4);
-}
+// .post:hover {
+//     background-color: rgba(225, 227, 230, 0.4);
+// }

@@ -2,6 +2,7 @@
 {% set author = post.author %}
 {% set is_liked = post.is_liked_by(request.user_id) %}
 {% set is_collected = post.is_collected_by(request.user_id) %}
+{% set is_followed = author.is_followed_by(request.user_id) %}
 <div class="post detail">
   <div class="btn-group-vertical upvote">
     <a id="like-button-{{ post.id }}" class="btn btn-default btn-xs like-button {% if is_liked %}liked{% endif %}" rel="nofollow"
@@ -46,8 +47,9 @@
 
       <p class="bio">{{ author.bio }}</p>
 
-      <a class="btn btn-info btn-xs follow-button" data-disable-with="请稍候..." rel="nofollow" data-url="{{ author.url()}}/follow">
-        关注TA
+      <a class="btn btn-info btn-xs follow-button {% if is_followed %}followed{% endif %}" data-disable-with="请稍候..."
+        rel="nofollow" data-url="{{ author.url()}}/follow">
+        {% if is_followed %}已{% endif %}关注TA
       </a>
     </div>
   </div>

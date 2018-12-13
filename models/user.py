@@ -5,6 +5,7 @@ from sqlalchemy import func as alchemyFn
 from ext import db
 from config import UPLOAD_FOLDER
 from models.mixin import BaseMixin
+from models.contact import Contact
 from corelib.utils import generate_id
 
 roles_users = db.Table(
@@ -37,10 +38,12 @@ class User(db.Model, UserMixin, BaseMixin):
         "Role", secondary=roles_users, backref=db.backref("users", lazy="dynamic")
     )
 
+    _stats = None
+
     __table_args__ = (db.Index("idx_name", name), db.Index("idx_email", email))
 
     def url(self):
-        return f"/user/{self.id}"
+        return f"user/{self.id}"
 
     @property
     def avatar_path(self):
@@ -54,9 +57,27 @@ class User(db.Model, UserMixin, BaseMixin):
     def upload_avatar(self, img):
         avatar_id = generate_id()
         filename = UPLOAD_FOLDER / "avatars" / f"{avatar_id}.png"
-        with open(filename, 'wb') as f:
+        with open(filename, "wb") as f:
             img.save(f)
         self.update_avatar(avatar_id)
+
+    def follow(self, from_id):
+        ok, _ = Contact.create(to_id=self.id, from_id=from_id)
+        if ok:
+            self._stats = None
+        return ok
+
+    def unfollow(self, from_id):
+        contact = Contact.get_follow_item(from_id, self.id)
+        if contact:
+            contact.delete()
+            self._stats = None
+            return True
+        return False
+
+    def is_followed_by(self, user_id):
+        contact = Contact.get_follow_item(user_id, self.id)
+        return bool(contact)
 
 
 class Role(db.Model, RoleMixin):

@@ -17,6 +17,10 @@ class Contact(BaseMixin, db.Model):
         db.Index("idx_time_to_from", "created_at", to_id, from_id),
     )
 
+    @classmethod
+    def get_follow_item(cls, from_id, to_id):
+        return cls.query.filter_by(from_id=from_id, to_id=to_id).first()
+
 
 class userFollowStats(BaseMixin, db.Model):
     follower_count = db.Column(db.Integer, default=0)

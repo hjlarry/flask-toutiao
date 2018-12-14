@@ -102,5 +102,8 @@ class userFollowStats(BaseMixin, db.Model):
             st = cls(id=id)
             session.add(st)
             session.commit()
+        # 如果直接把这个scoped_session()的st返回了，会造成sqlalchemy.exc.InvalidRequestError:
+        #  Object '<userFollowStats at 0x1058976d8>' is already attached to session '5' (this is '4')
+        st = cls.get(id)
         return st
 

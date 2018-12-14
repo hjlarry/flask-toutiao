@@ -5,7 +5,7 @@ from sqlalchemy import func as alchemyFn
 from ext import db
 from config import UPLOAD_FOLDER
 from models.mixin import BaseMixin
-from models.contact import Contact
+from models.contact import Contact, userFollowStats
 from corelib.utils import generate_id
 
 roles_users = db.Table(
@@ -43,7 +43,7 @@ class User(db.Model, UserMixin, BaseMixin):
     __table_args__ = (db.Index("idx_name", name), db.Index("idx_email", email))
 
     def url(self):
-        return f"user/{self.id}"
+        return f"/user/{self.id}"
 
     @property
     def avatar_path(self):
@@ -78,6 +78,24 @@ class User(db.Model, UserMixin, BaseMixin):
     def is_followed_by(self, user_id):
         contact = Contact.get_follow_item(user_id, self.id)
         return bool(contact)
+
+    @property
+    def n_followers(self):
+        return self._follow_stats[0]
+
+    @property
+    def n_following(self):
+        return self._follow_stats[1]
+
+    @property
+    def _follow_stats(self):
+        if self._stats is None:
+            stats = userFollowStats.get(self.id)
+            if not stats:
+                self._stats = 0, 0
+            else:
+                self._stats = stats.follower_count, stats.following_count
+        return self._stats
 
 
 class Role(db.Model, RoleMixin):

@@ -1,17 +1,19 @@
-from flask import render_template
+from flask import g, render_template
 from flask_security import current_user
+from social_flask.routes import social_auth
+from social_flask_sqlalchemy.models import init_social
 from werkzeug.wsgi import DispatcherMiddleware
 
 import config
-from views.index import bp as index_bp
-from views.account import bp as account_bp
-from views.api.api_app import json_api
 from corelib.exmail import send_mail
 from corelib.flask_ import Flask
 from corelib.utils import update_url_query
-from ext import db, security, mail, debug_bar
-from forms import ExtendedRegisterForm, ExtendedLoginForm
+from ext import db, debug_bar, mail, security
+from forms import ExtendedLoginForm, ExtendedRegisterForm
 from models.user import user_datastore
+from views.account import bp as account_bp
+from views.api.api_app import json_api
+from views.index import bp as index_bp
 
 
 def create_app():
@@ -21,16 +23,6 @@ def create_app():
     register_bp(app)
     app.context_processor(inject_template_global)
     app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {"/api": json_api})
-
-    @app.teardown_request
-    def teardown_request(exception):
-        if exception:
-            db.session.rollback()
-        db.session.remove()
-
-    @app.errorhandler(404)
-    def page_not_found(e):
-        return render_template("404.html"), 404
 
     return app
 
@@ -48,11 +40,13 @@ def init_app(app):
     security._state = _state
     app.security = security
     security.send_mail_task(send_mail)
+    init_social(app, db.session)
 
 
 def register_bp(app):
     app.register_blueprint(index_bp, url_prefix="/")
     app.register_blueprint(account_bp, url_prefix="/")
+    app.register_blueprint(social_auth)
 
 
 def inject_template_global():
@@ -68,3 +62,20 @@ def inject_template_global():
 
 
 app = create_app()
+
+
+@app.before_request
+def global_user():
+    g.user = current_user
+
+
+@app.teardown_request
+def teardown_request(exception):
+    if exception:
+        db.session.rollback()
+    db.session.remove()
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404

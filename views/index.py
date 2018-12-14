@@ -36,7 +36,7 @@ def tag(identifier):
     if type == "latest":
         posts = PostTag.get_post_by_tag(identifier, page)
     elif type == "hot":
-        posts = Item.get_post_ids_by_tag(tag, page)
+        posts = Item.get_post_ids_by_tag(tag, page, order_by="hot")
         posts.items = Post.get_multi(posts.items)
     else:
         posts = []

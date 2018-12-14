@@ -165,7 +165,7 @@ class Item(Document):
         start = (page - 1) * PER_PAGE
         s = s.extra(**{"from": start, "size": per_page})
         if order_by == "hot":
-            s = s.query(Q("function_score", functions=[gauss_sf, score_sf]))
+            s = s.query(Q("function_score", functions=[]))
         else:
             s = s.sort(order_by)
         rs = s.execute()

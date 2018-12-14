@@ -7,6 +7,7 @@ from ext import db
 from corelib.db import PropsItem
 from corelib.mc import rdb, cache
 from corelib.utils import cached_hybrid_property, is_numeric, trunc_utf8
+from config import PER_PAGE
 from .mixin import BaseMixin
 from .consts import K_POST
 from .comment import CommentMixin
@@ -14,7 +15,6 @@ from .like import LikeMixin
 from .collect import CollectMixin
 from .user import User
 
-PER_PAGE = 10
 MC_KEY_ALL_TAGS = "core:all_tags"
 MC_KEY_POSTS_BY_TAG = "core:posts_by_tags:{}:{}"
 MC_KEY_POST_COUNT_BY_TAG = "core:count_by_tags:{}"

@@ -1,24 +1,29 @@
 [[source]]
+
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
+
 [packages]
+
 sqlalchemy = "*"
 flask-sqlalchemy = "*"
 flask-security = "*"
 "dogpile.cache" = "*"
 walrus = "*"
 requests = "*"
-flask_migrate = "*"
+flask-migrate = "*"
 pymysql = "*"
 feedparser = "*"
 bcrypt = "*"
 flask-debugtoolbar = "*"
 elasticsearch-dsl = "*"
 marshmallow = "*"
-social-auth-app-flask = "*"
-social-auth-app-flask-sqlalchemy = "*"
+flask-dance = "*"
+sqlalchemy-utils = "*"
+
 
 [dev-packages]
+
 pylint = "*"

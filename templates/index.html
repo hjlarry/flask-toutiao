@@ -1,5 +1,24 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
 
-{% block content %}
-  <p class="title">{{ '当前用户: {}'.format(request.user.name) if request.user else '未登录' }}</p>
-{% endblock %}
+<head>
+  <title>Flask-Dance Multi-User SQLAlchemy</title>
+</head>
+
+<body>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <ul class="flash">
+    {% for category, message in messages %}
+    <li class="{{ category }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% endwith %}
+  {% if current_user.is_authenticated %}
+  You are logged in as {{ current_user.name }}!
+  <a href="{{ url_for("security.logout") }}">Log out</a>
+  {% else %}
+  You are not logged in.
+  <a href="{{ url_for("github.login") }}">Log in</a>
+  {% endif %}
+</body>

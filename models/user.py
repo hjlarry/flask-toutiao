@@ -1,6 +1,7 @@
 import requests
 from flask_security import UserMixin, RoleMixin, SQLAlchemyUserDatastore
 from sqlalchemy import func as alchemyFn
+from flask_dance.consumer.backend.sqla import OAuthConsumerMixin
 
 from ext import db
 from config import UPLOAD_FOLDER
@@ -19,6 +20,7 @@ class User(db.Model, UserMixin, BaseMixin):
     __tablename__ = "users"
     bio = db.Column(db.String(128), default="")
     name = db.Column(db.String(128), default="")
+    username = db.Column(db.String(128), default="")
     nickname = db.Column(db.String(128), default="")
     email = db.Column(db.String(191), default="")
     password = db.Column(db.String(191))
@@ -123,6 +125,12 @@ class BranSQLAlchemyUserDatastore(SQLAlchemyUserDatastore):
         rv = user_model_query.filter(query).first()
         if rv is not None:
             return rv
+
+
+class OAuth(OAuthConsumerMixin, db.Model):
+    provider_user_id = db.Column(db.String(256), unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
+    user = db.relationship(User)
 
 
 user_datastore = BranSQLAlchemyUserDatastore(db, User, Role)

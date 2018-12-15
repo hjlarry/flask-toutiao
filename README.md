@@ -43,3 +43,15 @@ return st
 
 
 ### 五、 elesticsearch的使用
+
+
+### 其他问题
+1. 注册发送确认邮件时并未发送我们在templates定义的邮件html页面内容
+这是因为flask_security.utils.send_mail()方法中，有一行代码不同导致：
+```
+# flask_security的官方仓库的develop分支以及董大那个版本
+msg.html = _security.render_template('%s/%s.html' % ctx, **context)
+# flask_security的官方仓库的master分支，也就是默认pip install的版本
+msg.html = render_template('%s/%s.html' % ctx, **context)  
+```
+感觉好坑，其官方文档明确说了替换这些email模板很容易，结果一个3.0的主版本已经发了一年了还不更新还有这bug

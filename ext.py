@@ -13,6 +13,7 @@ from flask_security import Security
 from flask_mail import Mail
 from flask_debugtoolbar import DebugToolbarExtension
 from flask import abort
+from walrus import Database
 
 from config import REDIS_URL
 from corelib.db import PropsMixin, PropsItem
@@ -362,3 +363,4 @@ db = UnLockedAlchemy(model_class=BaseModel)
 security = Security()
 mail = Mail()
 debug_bar = DebugToolbarExtension()
+rdb = Database.from_url(REDIS_URL)

@@ -1,10 +1,6 @@
-from flask import g, render_template, flash
-from flask_security import current_user, login_user
+from flask import g, render_template
+from flask_security import current_user
 from werkzeug.wsgi import DispatcherMiddleware
-from flask_dance.contrib.github import make_github_blueprint, github
-from flask_dance.consumer.backend.sqla import SQLAlchemyBackend
-from flask_dance.consumer import oauth_authorized
-from sqlalchemy.orm.exc import NoResultFound
 
 import config
 from corelib.exmail import send_mail
@@ -13,59 +9,9 @@ from corelib.utils import update_url_query
 from ext import db, debug_bar, mail, security
 from forms import ExtendedLoginForm, ExtendedRegisterForm
 from models.user import user_datastore, OAuth, User
-from views.account import bp as account_bp
+from views.account import bp as account_bp, github_bp
 from views.api.api_app import json_api
 from views.index import bp as index_bp
-
-github_bp = make_github_blueprint(
-    backend=SQLAlchemyBackend(OAuth, db.session, user=current_user)
-)
-
-
-@oauth_authorized.connect_via(github_bp)
-def github_logged_in(blueprint, token):
-    if not token:
-        flash("Failed to log in with GitHub.", category="error")
-        return False
-
-    resp = blueprint.session.get("/user")
-    if not resp.ok:
-        msg = "Failed to fetch user info from GitHub."
-        flash(msg, category="error")
-        return False
-
-    github_info = resp.json()
-    github_user_id = str(github_info["id"])
-
-    # Find this OAuth token in the database, or create it
-    query = OAuth.query.filter_by(
-        provider=blueprint.name, provider_user_id=github_user_id
-    )
-    try:
-        oauth = query.one()
-    except NoResultFound:
-        oauth = OAuth(
-            provider=blueprint.name, provider_user_id=github_user_id, token=token
-        )
-
-    if oauth.user:
-        login_user(oauth.user)
-        flash("Successfully signed in with GitHub.")
-
-    else:
-        user = User(
-            # Remember that `email` can be None, if the user declines
-            # to publish their email address on GitHub!
-            email=github_info["email"],
-            name=github_info["name"],
-        )
-        oauth.user = user
-        db.session.add_all([user, oauth])
-        db.session.commit()
-        login_user(user)
-        flash("Successfully signed in with GitHub.")
-
-    return False
 
 
 def create_app():
@@ -97,7 +43,7 @@ def init_app(app):
 def register_bp(app):
     app.register_blueprint(index_bp, url_prefix="/")
     app.register_blueprint(account_bp, url_prefix="/")
-    app.register_blueprint(github_bp, url_prefix="/git")
+    app.register_blueprint(github_bp, url_prefix="/login_oauth")
 
 
 def inject_template_global():
@@ -113,11 +59,6 @@ def inject_template_global():
 
 
 app = create_app()
-
-
-@app.before_request
-def global_user():
-    g.user = current_user
 
 
 @app.teardown_request

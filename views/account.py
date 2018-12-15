@@ -1,8 +1,14 @@
+from datetime import datetime
 from flask.blueprints import Blueprint
 from flask import render_template, abort, request
-from flask_security import login_required
+from flask_security import login_required, current_user, login_user
+from flask_dance.contrib.github import make_github_blueprint, github
+from flask_dance.consumer.backend.sqla import SQLAlchemyBackend
+from flask_dance.consumer import oauth_authorized
+from sqlalchemy.orm.exc import NoResultFound
 
-from models.user import User
+from ext import db
+from models.user import User, OAuth
 from models.core import Post
 from models.collect import CollectItem
 from models.like import LikeItem
@@ -11,6 +17,48 @@ from corelib.utils import AttrDict
 
 
 bp = Blueprint("account", __name__)
+github_bp = make_github_blueprint(
+    backend=SQLAlchemyBackend(OAuth, db.session, user=current_user)
+)
+
+
+@oauth_authorized.connect_via(github_bp)
+def github_logged_in(blueprint, token):
+    if not token:
+        return False
+
+    resp = blueprint.session.get("/user")
+    if not resp.ok:
+        return False
+
+    github_info = resp.json()
+    github_user_id = str(github_info["id"])
+
+    query = OAuth.query.filter_by(
+        provider=blueprint.name, provider_user_id=github_user_id
+    )
+    try:
+        oauth = query.one()
+    except NoResultFound:
+        oauth = OAuth(
+            provider=blueprint.name, provider_user_id=github_user_id, token=token
+        )
+
+    if oauth.user:
+        login_user(oauth.user)
+
+    else:
+        user = User(
+            email=github_info["email"],
+            name=github_info["name"],
+            active=True,
+            confirmed_at=datetime.utcnow(),
+        )
+        oauth.user = user
+        db.session.add_all([user, oauth])
+        db.session.commit()
+        login_user(user)
+    return False
 
 
 @bp.route("register_landing")

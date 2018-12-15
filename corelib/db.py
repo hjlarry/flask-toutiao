@@ -2,12 +2,8 @@ import copy
 import json
 from datetime import datetime
 
-from walrus import Database
-
-from config import REDIS_URL
+from ext import rdb
 from corelib.local_cache import lc
-
-rdb = Database.from_url(REDIS_URL)
 
 
 class PropsMixin:

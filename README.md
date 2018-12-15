@@ -18,6 +18,7 @@ redis中存储了这些东西:
 1. 避免使用外键约束
 2. with_entities的使用
 3. target_id/target_kind的使用
+4. 考虑从业务角度限制一些model的功能，比如限制Contact的update
 
 疑惑:
 1. 有的表设了'mysql_charset': 'utf8'，是否没有str相关字段的表都应该这样设置去节省空间?
@@ -51,7 +52,10 @@ return st
 ```
 # flask_security的官方仓库的develop分支以及董大那个版本
 msg.html = _security.render_template('%s/%s.html' % ctx, **context)
-# flask_security的官方仓库的master分支，也就是默认pip install的版本
+# flask_security的官方仓库的master分支，也就是直接pip install的版本
 msg.html = render_template('%s/%s.html' % ctx, **context)  
 ```
-感觉好坑，其官方文档明确说了替换这些email模板很容易，结果一个3.0的主版本已经发了一年了还不更新还有这bug
+感觉好坑，其官方文档明确说了替换这些email模板很容易，结果一个3.0的主版本已经发布了一年了还不更新还有这bug
+也可以通过自定义send_mail方法来避免修改flask_security的源码解决这个问题，官方文档有写
+
+2. 使用flask_dance替代social-oauth。因为依据当前flask_security的配置某用户要登陆成功就必须active字段是true且confirm_at字段有值，flask_dance可以通过外部去介入其创建用户的过程，social-oauth可能要修改源码

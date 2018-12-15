@@ -20,7 +20,6 @@ class User(db.Model, UserMixin, BaseMixin):
     __tablename__ = "users"
     bio = db.Column(db.String(128), default="")
     name = db.Column(db.String(128), default="")
-    username = db.Column(db.String(128), default="")
     nickname = db.Column(db.String(128), default="")
     email = db.Column(db.String(191), default="")
     password = db.Column(db.String(191))

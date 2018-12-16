@@ -26,40 +26,34 @@ github_bp = make_github_blueprint(
 def github_logged_in(blueprint, token):
     if not token:
         return False
-
     resp = blueprint.session.get("/user")
     if not resp.ok:
         return False
 
     github_info = resp.json()
-    print(github_info)
     github_user_id = str(github_info["id"])
-
-    query = OAuth.query.filter_by(
+    oauth = OAuth.query.filter_by(
         provider=blueprint.name, provider_user_id=github_user_id
-    )
-    try:
-        oauth = query.one()
-    except NoResultFound:
+    ).first()
+    if oauth:
+        user = User.get(oauth.user_id)
+    else:
         oauth = OAuth(
             provider=blueprint.name, provider_user_id=github_user_id, token=token
         )
-
-    if oauth.user:
-        login_user(oauth.user)
-
-    else:
-        user = User(
+        ok, user = User.create(
             email=github_info["email"],
             name=github_info["name"],
             github_id=github_info["login"],
             active=True,
             confirmed_at=datetime.utcnow(),
         )
-        user.upload_avatar(github_info["avatar_url"])
-        oauth.user_id = user.id
-        oauth.save()
-        login_user(user)
+        # user.upload_avatar(github_info["avatar_url"]) 需要异步
+        if ok:
+            oauth.user_id = user.id
+            oauth.save()
+
+    login_user(user)
     return False
 
 

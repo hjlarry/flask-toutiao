@@ -1,6 +1,8 @@
 import requests
 from flask_security import UserMixin, RoleMixin, SQLAlchemyUserDatastore
 from sqlalchemy import func as alchemyFn
+from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy_utils import JSONType
 from flask_dance.consumer.backend.sqla import OAuthConsumerMixin
 
 from ext import db
@@ -133,10 +135,14 @@ class BranSQLAlchemyUserDatastore(SQLAlchemyUserDatastore):
             return rv
 
 
-class OAuth(OAuthConsumerMixin, db.Model, BaseMixin):
-    provider_user_id = db.Column(db.String(256), unique=True)
-    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
-    user = db.relationship(User)
+class OAuth(db.Model, BaseMixin):
+    __tablename__ = "oauth"
+    provider = db.Column(db.String(50))
+    token = db.Column(MutableDict.as_mutable(JSONType))
+    provider_user_id = db.Column(db.String(256))
+    user_id = db.Column(db.Integer)
+
+    __table_args__ = (db.Index("idx_pd_pu", provider, provider_user_id),)
 
 
 user_datastore = BranSQLAlchemyUserDatastore(db, User, Role)

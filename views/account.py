@@ -32,6 +32,7 @@ def github_logged_in(blueprint, token):
         return False
 
     github_info = resp.json()
+    print(github_info)
     github_user_id = str(github_info["id"])
 
     query = OAuth.query.filter_by(
@@ -51,12 +52,13 @@ def github_logged_in(blueprint, token):
         user = User(
             email=github_info["email"],
             name=github_info["name"],
+            github_id=github_info["login"],
             active=True,
             confirmed_at=datetime.utcnow(),
         )
-        oauth.user = user
-        db.session.add_all([user, oauth])
-        db.session.commit()
+        user.upload_avatar(github_info["avatar_url"])
+        oauth.user_id = user.id
+        oauth.save()
         login_user(user)
     return False
 

@@ -58,8 +58,15 @@ class User(db.Model, UserMixin, BaseMixin):
     def upload_avatar(self, img):
         avatar_id = generate_id()
         filename = UPLOAD_FOLDER / "avatars" / f"{avatar_id}.png"
-        with open(filename, "wb") as f:
-            img.save(f)
+        if isinstance(img, str) and img.startswith("http"):
+            r = requests.get(img)
+            if r.status_code == 200:
+                with open(filename, "wb") as f:
+                    for chunk in r.iter_content(1024):
+                        f.write(chunk)
+        else:
+            with open(filename, "wb") as f:
+                img.save(f)
         self.update_avatar(avatar_id)
 
     def follow(self, from_id):
@@ -126,7 +133,7 @@ class BranSQLAlchemyUserDatastore(SQLAlchemyUserDatastore):
             return rv
 
 
-class OAuth(OAuthConsumerMixin, db.Model):
+class OAuth(OAuthConsumerMixin, db.Model, BaseMixin):
     provider_user_id = db.Column(db.String(256), unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey(User.id))
     user = db.relationship(User)

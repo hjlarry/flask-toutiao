@@ -1,9 +1,10 @@
 from corelib.db import PropsItem
 from corelib.utils import cached_hybrid_property
 from ext import db
-from models.consts import K_COMMENT
-from models.like import LikeMixin
-from models.mixin import ActionMixin
+from .consts import K_COMMENT
+from .like import LikeMixin
+from .mixin import ActionMixin
+from .user import User
 
 
 class CommentItem(ActionMixin, LikeMixin, db.Model):
@@ -22,6 +23,10 @@ class CommentItem(ActionMixin, LikeMixin, db.Model):
     @cached_hybrid_property
     def html_content(self):
         return self.content
+
+    @cached_hybrid_property
+    def user(self):
+        return User.get(self.user_id)
 
 
 class CommentMixin:

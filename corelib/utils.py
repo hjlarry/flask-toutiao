@@ -39,6 +39,7 @@ def generate_id():
 
 
 def is_numeric(value):
+    """检测一个str的值是不是可以是整数"""
     try:
         int(value)
     except (TypeError, ValueError):

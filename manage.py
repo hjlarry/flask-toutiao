@@ -18,13 +18,10 @@ import models.user
 
 @app.cli.command()
 def initdb():
-    engine = db.get_engine()
-    models_.PSABase.metadata.drop_all(engine)
     db.session.commit()
     db.drop_all()
     rdb.flushall()
     db.create_all()
-    # models_.PSABase.metadata.create_all(engine)
     click.echo("Init finished!")
 
 
@@ -33,11 +30,3 @@ def initcache():
     rdb.flushall()
     click.echo("Init cache finished!")
 
-
-@app.cli.command()
-@with_appcontext
-def create_social_db():
-    engine = db.get_engine()
-    models_.PSABase.metadata.drop_all(engine)
-    models_.PSABase.metadata.create_all(engine)
-    click.echo("create social db finished!")

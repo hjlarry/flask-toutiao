@@ -93,7 +93,7 @@
 {% endmacro %}
 
 {% macro render_comment(comment) %}
-{% set user=request.user %}
+{% set user=comment.user %}
 <div class="comment media">
   <a class="media-left" href="{{user.url()}}"><img src="{{user.avatar_path}}" alt="Thumb"></a>
   <div class="media-body">

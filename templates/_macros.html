@@ -7,12 +7,12 @@
   <div class="btn-group-vertical upvote">
     <a id="like-button-{{ post.id }}" class="btn btn-default btn-xs like-button {% if is_liked %}liked{% endif %}" rel="nofollow"
       data-url="post/{{ post.id }}/like" data-original-title="点赞">
-      <i class="iconfont icon-dianzan"></i> <span>{{post.n_likes}}</span>
+      <i class="iconfont {% if is_liked %}icon-liked{% else %}icon-like{% endif %}"></i> <span>{{post.n_likes}}</span>
     </a>
 
     <a id="collect-button-{{ post.id }}" class="btn btn-default btn-xs collect-button {% if is_collected %}collected{% endif %}"
       rel="nofollow" data-url="post/{{ post.id }}/collect" data-original-title="收藏">
-      <i class="iconfont icon-shoucang"></i>
+      <i class="iconfont {% if is_collected %}icon-collected{% else %}icon-collect{% endif %}"></i>
     </a>
   </div>
 
@@ -26,7 +26,7 @@
     <div class="meta">
       {{ post.orig_netloc }}
       <span>
-        <i class="iconfont icon-qipao"></i>20
+        <i class="iconfont icon-message"></i>20
       </span>
     </div>
   </div>

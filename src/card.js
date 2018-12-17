@@ -20,9 +20,9 @@ $likeBtn.on('click', (event) => {
                     $this.toggleClass('liked');
                     $this.find('span').text(rs.data.n_likes);
                     if (isLiked) {
-                        $this.find('i').addClass('icon-dianzan_kuai').removeClass('icon-dianzan');
+                        $this.find('i').addClass('icon-liked').removeClass('icon-like');
                     } else {
-                        $this.find('i').addClass('icon-dianzan').removeClass('icon-dianzan_kuai');
+                        $this.find('i').addClass('icon-like').removeClass('icon-liked');
                     }
                 }
             } else {
@@ -46,9 +46,9 @@ $collectBtn.on('click', (event) => {
                     $isCollected = isCollected;
                     $this.toggleClass('collected');
                     if (isCollected) {
-                        $this.find('i').addClass('icon-shoucang_shixin').removeClass('icon-shoucang');
+                        $this.find('i').addClass('icon-collected').removeClass('icon-collect');
                     } else {
-                        $this.find('i').addClass('icon-shoucang').removeClass('icon-shoucang_shixin');
+                        $this.find('i').addClass('icon-collect').removeClass('icon-collected');
                     }
                 }
             } else {

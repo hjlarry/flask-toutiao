@@ -13,14 +13,13 @@
     {{ render_field_with_errors(register_user_form.email) }}
     {{ render_field_with_errors(register_user_form.password) }}
     {% if register_user_form.password_confirm %}
-      {{ render_field_with_errors(register_user_form.password_confirm) }}
+    {{ render_field_with_errors(register_user_form.password_confirm) }}
     {% endif %}
     {{ render_submit('注册') }}
   </form>
   <br>
   <div class="text-center">
-    <a class="btn btn-default" href="/login/douban/"><i class="fa fa-weixin"></i> 豆瓣</a>
-    <a class="btn btn-default" href="/login/github/"><i class="fa fa-github"></i> GitHub</a>
+    <a class="btn btn-default" href="/login/github/"><i class="iconfont icon-github"></i>GitHub登录</a>
   </div>
   <div class="menu">
     <p class="center"><a href="{{ url_for_security('login') }}{% if 'next' in request.args %}?next={{ request.args.next|urlencode }}{% endif %}">已有账号登录?</a></p>

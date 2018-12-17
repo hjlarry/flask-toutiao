@@ -15,12 +15,12 @@
   </form>
   <br>
   <div class="text-center">
-      <a class="btn btn-default" href="/login/douban/"><i class="fa fa-weixin"></i> 豆瓣</a>
-      <a class="btn btn-default" href="/login/github/"><i class="fa fa-github"></i> GitHub</a>
+    <a class="btn btn-default" href="{{ url_for("github.login") }}"><i class="iconfont icon-github"></i>GitHub登录</a>
   </div>
   <br>
   <div class="menu">
-     <p class="left">没有账号？ <a href="{{ url_for_security('register') }}{% if 'next' in request.args %}?next={{ request.args.next|urlencode }}{% endif %}">注册</a> <a class="right" href="{{ url_for_security('forgot_password') }}">忘记密码？</a></p>
-   </div>
+    <p class="left">没有账号？ <a href="{{ url_for_security('register') }}{% if 'next' in request.args %}?next={{ request.args.next|urlencode }}{% endif %}">注册</a>
+      <a class="right" href="{{ url_for_security('forgot_password') }}">忘记密码？</a></p>
+  </div>
 </div>
 {% endblock %}

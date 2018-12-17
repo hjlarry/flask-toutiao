@@ -15,16 +15,15 @@
 </div>
 
 
-<div class="social-share-button text-center" data-title="不改一行代码定位线上性能问题 {{ url }} 分享自 @{{ post.author.name }}"
+<div class="social-share-button text-center" data-title="{{ post.title }} {{ url }} 分享自 @{{ post.author.name }}"
   data-type="text" data-url={{ url }}>
   <h5>分享到</h5>
-  <a href="javascript:;" class="btn btn-danger" rel="external nofollow" data-site="github" onclick="return SocialShareButton.share(this);"><i
-      class="fa fa-weibo"></i> Github</a>
+  <a class="btn btn-danger share-weibo" rel="external nofollow" data-site="weibo" href="javascript;;"><i class="iconfont icon-weibo"></i>
+    微博</a>
   <span class="dropdown weixin-qrcode-dropdown">
-    <button class="btn btn-success" id="weixin-qrcode" type="button" data-toggle="dropdown" aria-haspopup="true"
-      aria-expanded="false"><i class="fa fa-weixin"></i> 微信</button>
-    <span class="dropdown-menu weixin-qrcode-dropdown-menu" aria-labelledby="weixin-qrcode" data-url="{{ url }}">
-      <span class="weixin-qrcode" aria-labelledby="weixin-qrcode" data-url="{{ url }}"><canvas width="132" height="132"></canvas></span>
+    <button class="btn btn-success" type="button" data-toggle="dropdown"><i class="iconfont icon-weixin"></i> 微信</button>
+    <span class="dropdown-menu weixin-qrcode-dropdown-menu" data-url="{{ url }}">
+      <span id="weixin-qrcode" data-url="{{ url }}"></span>
     </span>
   </span>
 </div>

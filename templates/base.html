@@ -40,15 +40,15 @@
               <li class="dropdown-item"><a href="{{ url_for('account.user_following', identifier=request.user.id) }}">我的关注</a></li>
               <li class="dropdown-item"><a href="{{ url_for('account.user', identifier=request.user.id) }}">我的主页</a></li>
               <li class="dropdown-item"><a href="{{ url_for('account.settings') }}">个人设置</a></li>
-              <li class="dropdown-item"><a href="/logout">退出</a></li>
+              <li class="dropdown-item"><a href="{{ url_for_security('logout') }}">退出</a></li>
             </ul>
           </li>
           {% else %}
           <li class="nav-item">
-            <a class="nav-link" href="/login">登录</a>
+            <a class="nav-link" href="{{ url_for_security('login') }}">登录</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/register">注册</a>
+            <a class="nav-link" href="{{ url_for_security('register') }}">注册</a>
           </li>
           {% endif %}
         </ul>

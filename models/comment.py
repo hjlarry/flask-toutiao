@@ -54,4 +54,4 @@ class CommentMixin:
 
     @property
     def n_comments(self):
-        return self.get_n_comments()
+        return int(CommentItem.get_count_by_target(self.id, self.kind))

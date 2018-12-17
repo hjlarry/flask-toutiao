@@ -20,15 +20,11 @@
   <h5>分享到</h5>
   <a class="btn btn-danger share-weibo" rel="external nofollow" data-site="weibo" href="javascript;;"><i class="iconfont icon-weibo"></i>
     微博</a>
-  <span class="dropdown weixin-qrcode-dropdown">
-    <button class="btn btn-success" type="button" data-toggle="dropdown"><i class="iconfont icon-weixin"></i> 微信</button>
-    <span class="dropdown-menu weixin-qrcode-dropdown-menu" data-url="{{ url }}">
-      <span id="weixin-qrcode" data-url="{{ url }}"></span>
-    </span>
-  </span>
+  <a class="btn btn-success share-weixin" rel="external nofollow" data-site="weixin" href="javascript;;"><i class="iconfont icon-weixin"></i>
+    微信</a>
 </div>
 <div class="post-comment-form">
-  <span>评论 (15)</span>
+  <span>评论 ({{ post.n_comments }})</span>
   {% if not request.user %}
   <div class="login-actions">
     <a class="btn btn-success" href="/login">登录后评论</a>

@@ -18,6 +18,7 @@ from .user import User
 MC_KEY_ALL_TAGS = "core:all_tags"
 MC_KEY_POSTS_BY_TAG = "core:posts_by_tags:{}:{}"
 MC_KEY_POST_COUNT_BY_TAG = "core:count_by_tags:{}"
+MC_KEY_POST_TAGS = "core:post:{}:tags"
 HERE = pathlib.Path(__file__).resolve()
 
 
@@ -30,27 +31,7 @@ class Post(BaseMixin, CommentMixin, LikeMixin, CollectMixin, db.Model):
     content = PropsItem("content", "")
     kind = K_POST
 
-    __table_args__ = (db.Index("idx_title", title),)
-
-    @classmethod
-    def __flush_event__(cls, target):
-        rdb.delete(MC_KEY_ALL_TAGS)
-
-    @classmethod
-    def get(cls, identifier):
-        if is_numeric(identifier):
-            return cls.cache.get(identifier)
-        return cls.cache.filter(title=identifier).first()
-
-    @property
-    def tags(self):
-        at_ids = (
-            PostTag.query.with_entities(PostTag.tag_id)
-            .filter(PostTag.post_id == self.id)
-            .all()
-        )
-        tags = Tag.query.filter(Tag.id.in_((id for id, in at_ids))).all()
-        return tags
+    __table_args__ = (db.Index("idx_title", title), db.Index("idx_authorId", author_id))
 
     @cached_hybrid_property
     def abstract_content(self):
@@ -65,12 +46,44 @@ class Post(BaseMixin, CommentMixin, LikeMixin, CollectMixin, db.Model):
         return urlparse(self.orig_url).netloc
 
     @classmethod
+    def get(cls, identifier):
+        if is_numeric(identifier):
+            return cls.cache.get(identifier)
+        return cls.cache.filter(title=identifier).first()
+
+    @property
+    @cache(MC_KEY_POST_TAGS.format("{self.id}"))
+    def tags(self):
+        at_ids = (
+            PostTag.query.with_entities(PostTag.tag_id)
+            .filter(PostTag.post_id == self.id)
+            .all()
+        )
+        tags = Tag.query.filter(Tag.id.in_((id for id, in at_ids))).all()
+        return tags
+
+    @classmethod
     def create_or_update(cls, **kwargs):
         tags = kwargs.pop("tags", [])
         created, obj = super(Post, cls).create_or_update(**kwargs)
         if tags:
             PostTag.update_multi(obj.id, tags)
         return created, obj
+
+    def delete(self):
+        id = self.id
+        super().delete()
+        for pt in PostTag.query.filter_by(post_id=id):
+            pt.delete()
+
+    @classmethod
+    def __flush_event__(cls, target):
+        rdb.delete(MC_KEY_ALL_TAGS)
+
+    @staticmethod
+    def _flush_insert_event(mapper, connection, target):
+        target._flush_event(mapper, connection, target)
+        target.__flush_insert_event__(target)
 
 
 class Tag(BaseMixin, db.Model):
@@ -82,6 +95,27 @@ class Tag(BaseMixin, db.Model):
     @classmethod
     def get_by_name(cls, name):
         return cls.query.filter_by(name=name).first()
+
+    def update(self, **kwargs):
+        raise NotImplementedError("tag table can`t update ")
+
+    def delete(self):
+        raise NotImplementedError("tag table can`t delete ")
+
+    @classmethod
+    def create(cls, **kwargs):
+        name = kwargs.pop("name")
+        kwargs["name"] = name.lower()
+        return super().create(**kwargs)
+
+    @classmethod
+    @cache(MC_KEY_ALL_TAGS)
+    def all_tags(cls):
+        return cls.query.all()
+
+    @classmethod
+    def __flush_event__(cls, target):
+        rdb.delete(MC_KEY_ALL_TAGS)
 
 
 class PostTag(BaseMixin, db.Model):
@@ -149,6 +183,7 @@ class PostTag(BaseMixin, db.Model):
             obj = cls.query.filter(
                 cls.post_id == post_id, cls.tag_id.in_(need_del_tag_ids)
             )
+            # 更新之前进行查询，获取最新的更新对象
             obj.delete(synchronize_session="fetch")
         for tag_id in need_add_tag_ids:
             cls.create(post_id=post_id, tag_id=tag_id)

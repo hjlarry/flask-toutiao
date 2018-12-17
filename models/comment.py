@@ -21,10 +21,6 @@ class CommentItem(ActionMixin, LikeMixin, db.Model):
     __table_args__ = (db.Index("idx_ti_tk_ui", target_id, target_kind, user_id),)
 
     @cached_hybrid_property
-    def html_content(self):
-        return self.content
-
-    @cached_hybrid_property
     def user(self):
         return User.get(self.user_id)
 

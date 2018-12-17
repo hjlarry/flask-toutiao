@@ -15,6 +15,11 @@
         </span>
     </div>
 </form>
+<div class="post-tags">
+    {% for tag in tags %}
+    <a class="btn btn-default btn-rounded btn-xs" href="{{ tag.url() }}">{{ tag.name }}</a>
+    {% endfor %}
+</div>
 
 {% for post in posts.items %}
 {{ macros.card(post) }}

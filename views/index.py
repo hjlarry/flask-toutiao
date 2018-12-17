@@ -50,4 +50,5 @@ def search():
     query = request.args.get("q", "")
     page = request.args.get("page", default=1, type=int)
     posts = Item.new_search(query, page)
-    return render_template("search.html", query=query, posts=posts)
+    tags = Tag.all_tags()
+    return render_template("search.html", query=query, posts=posts, tags=tags)

@@ -30,9 +30,12 @@ class Contact(BaseMixin, db.Model):
         ok, obj = super().create(**kwargs)
         cls.clear_mc(obj, 1)
         if ok:
-            from handler.tasks import feed_to_followers
+            from .feed import feed_to_followers
 
-            feed_to_followers.delay(obj.from_id, obj.to_id)
+            feed_to_followers(obj.from_id, obj.to_id)
+            # from handler.tasks import feed_to_followers
+
+            # feed_to_followers.delay(obj.from_id, obj.to_id)
         return ok, obj
 
     def delete(self):

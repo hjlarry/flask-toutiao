@@ -60,7 +60,7 @@ class User(db.Model, UserMixin, BaseMixin):
         avatar_id = generate_id()
         filename = UPLOAD_FOLDER / "avatars" / f"{avatar_id}.png"
         if isinstance(img, str) and img.startswith("http"):
-            r = requests.get(img)
+            r = requests.get(img, stream=True)
             if r.status_code == 200:
                 with open(filename, "wb") as f:
                     for chunk in r.iter_content(1024):

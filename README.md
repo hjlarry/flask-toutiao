@@ -15,6 +15,10 @@ redis中存储了这些东西:
 查了下dogpile是指刚好缓存失效时，大量并发导致服务器挂掉，那么这个库的作用是通过锁线程限制数据库查询？
 2. walrus的作用是什么?
 感觉项目里没有用到，实际上一直都用的set get等基础方法，而这些方法都是redis-py本身提供的
+3. 项目里所有用到zadd的地方需要改一下，因为redis-py 3.0以上修改了:
+* ZADD now requires all element names/scores be specified in a single
+  dictionary argument named mapping. This was required to allow the NX,
+  XX, CH and INCR options to be specified.
 
 
 ### 二、 sqlalchemy的使用

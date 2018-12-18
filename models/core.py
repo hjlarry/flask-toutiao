@@ -88,7 +88,7 @@ class Post(BaseMixin, CommentMixin, LikeMixin, CollectMixin, db.Model):
 
 class Tag(BaseMixin, db.Model):
     __tablename__ = "tags"
-    name = db.Column(db.String(128), default="")
+    name = db.Column(db.String(128), default="", unique=True)
 
     __table_args__ = (db.Index("idx_name", name),)
 

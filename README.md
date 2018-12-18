@@ -55,6 +55,7 @@ return st
 2. 添加teardown_request钩子用于异常时数据库事务回滚
 3. json_api 结合 schema
 4. add_template_global 和 context_processor
+5. get_template_attribute 拿模板内容
 
 
 ### 其他

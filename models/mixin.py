@@ -9,6 +9,8 @@ from .consts import K_POST
 
 # action_type, target_id, target_kind
 MC_KEY_STATS_N = "action_n:{}:{}:{}"
+# action_type, user_id, target_kind
+MC_KEY_BY_USER_STATS_N = "like_n_by_user:{}:{}:{}"
 # action_type, target_id, target_kind, page
 MC_KEY_ACTION_ITEMS = "action_items:{}:{}:{}:{}"
 # action_type, user_id, target_id, target_kind
@@ -114,6 +116,13 @@ class ActionMixin(BaseMixin):
 
     @classmethod
     @cache(
+        MC_KEY_BY_USER_STATS_N.format("{cls.action_type}", "{user_id}", "{target_kind}")
+    )
+    def get_count_by_user(cls, user_id, target_kind=K_POST):
+        return cls.query.filter_by(user_id=user_id, target_kind=target_kind).count()
+
+    @classmethod
+    @cache(
         MC_KEY_ACTION_ITEMS.format(
             "{cls.action_type}", "{target_id}", "{target_kind}", "{page}"
         )
@@ -152,6 +161,15 @@ class ActionMixin(BaseMixin):
         super().__flush_delete_event__(target)
         target.clear_mc(target, -1)
 
+    @staticmethod
+    def incr_key(stat_key, amount):
+        try:
+            total = rdb.incr(stat_key, amount)
+        except redis.exceptions.ResponseError:
+            rdb.delete(stat_key)
+            total = rdb.incr(stat_key, amount)
+        return total
+
     @classmethod
     def clear_mc(cls, target, amount):
         action_type = cls.action_type
@@ -159,12 +177,7 @@ class ActionMixin(BaseMixin):
         target_kind = target.target_kind
         user_id = target.user_id
         stat_key = MC_KEY_STATS_N.format(action_type, target_id, target_kind)
-
-        try:
-            total = rdb.incr(stat_key, amount)
-        except redis.exceptions.ResponseError:
-            rdb.delete(stat_key)
-            total = rdb.incr(stat_key, amount)
+        total = cls.incr_key(stat_key, amount)
         rdb.delete(
             MC_KEY_ACTION_ITEM_BY_USER.format(
                 action_type, user_id, target_id, target_kind
@@ -176,6 +189,10 @@ class ActionMixin(BaseMixin):
             rdb.delete(
                 MC_KEY_ACTION_ITEMS.format(action_type, target_id, target_kind, p)
             )
+        stat_key = MC_KEY_BY_USER_STATS_N.format(action_type, user_id, target_kind)
+        total = cls.incr_key(stat_key, amount)
+        pages = math.ceil((max(total, 0) or 1) / PER_PAGE)
+        for p in range(1, pages + 1):
             rdb.delete(
                 MC_KEY_ACTION_ITEMS_BY_USER.format(action_type, user_id, target_kind, p)
             )

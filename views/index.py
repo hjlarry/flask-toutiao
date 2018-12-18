@@ -1,16 +1,21 @@
 from flask.blueprints import Blueprint
 from flask import render_template, send_from_directory, request
+from flask_security import login_required
 
 from models.core import Post, Tag, PostTag
 from models.search import Item
+from models.feed import get_user_feed
 from config import UPLOAD_FOLDER
 
 bp = Blueprint("index", __name__)
 
 
 @bp.route("/")
+@login_required
 def index():
-    return render_template("index.html")
+    page = request.args.get("page", type=int, default=1)
+    posts = get_user_feed(request.user_id, page)
+    return render_template("index.html", posts=posts, page=page)
 
 
 @bp.route("/static/avatars/<path>")

@@ -21,13 +21,13 @@
       <div class="container">
         <ul class="nav navbar-right">
           <li class="nav-item">
-            <a class="nav-link active" href="/">首页</a>
+            <a class="nav-link {% if request.path=='/' %}active{% endif %}" href="/">首页</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/tag/python">Python</a>
+            <a class="nav-link {% if request.path=='/tag/python' %}active{% endif %}" href="/tag/python">Python</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/search">搜索</a>
+            <a class="nav-link {% if request.path=='/search' %}active{% endif %}" href="/search">搜索</a>
           </li>
           {% if request.user %}
           <li class="dropdown profile">

@@ -71,26 +71,16 @@ msg.html = render_template('%s/%s.html' % ctx, **context)
 
 2. 使用flask_dance替代social-oauth。因为依据当前flask_security的配置某用户要登陆成功就必须active字段是true且confirm_at字段有值，flask_dance可以通过外部去介入其创建用户的过程，social-oauth可能要修改源码。使用flask_dance本地测试时因为HTTPS的问题需要export OAUTHLIB_INSECURE_TRANSPORT=1
 
-3. MC_KEY_ALL_TAGS这个董大只写了删除，我添加了获取放在搜索页面
+3. card.js中的是否点赞收藏判断逻辑是$('.like-button').hasClass('liked')，那么在列表页中有任一条被点赞则判断都是True.我前端太弱这块还不会改
 
-4. card.js中的是否点赞收藏判断逻辑是$('.like-button').hasClass('liked')，那么在列表页中有任一条被点赞则判断都是True.我前端太弱这块还不会改
+4. 抓取内容时可以使用解析feed的方式，很方便
 
-5. 抓取内容时可以使用解析feed的方式，很方便
+5. celery任务添加flask上下文的方法
 
-6. celery任务添加flask上下文的方法
-
-
+6. iconfont使用
 
 
-没有使用到的类或方法
-corelib.db.Database get2() set2()
-corelib.db.PropsMixin incr_props_item() decr_props_item()
-corelib.db.DatetimePropsItem
-corelib.db.DatePropsItem
-corelib.local_cache.get_multi
-corelib.local_cache.get_list
-corelib.mc.pcache
-corelib.mc.pcache2
-如果MC_KEY都用{}的形式写的话，可以稍改下gen_key_factory，去掉formater()/format()方法
+
+
 
 

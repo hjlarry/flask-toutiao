@@ -68,13 +68,22 @@ class Post(BaseMixin, CommentMixin, LikeMixin, CollectMixin, db.Model):
         created, obj = super(Post, cls).create_or_update(**kwargs)
         if tags:
             PostTag.update_multi(obj.id, tags)
+        if created:
+            from handler.tasks import feed_post, reindex
+
+            reindex.delay(obj.id, obj.kind, op_type="create")
+            feed_post.delay(obj.id)
         return created, obj
 
     def delete(self):
-        id = self.id
+        post_id = self.id
+        author_id = self.author_id
         super().delete()
-        for pt in PostTag.query.filter_by(post_id=id):
+        for pt in PostTag.query.filter_by(post_id=post_id):
             pt.delete()
+        from handler.tasks import remove_post_from_feed
+
+        remove_post_from_feed.delay(post_id, author_id)
 
     @classmethod
     def __flush_event__(cls, target):

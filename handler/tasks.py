@@ -86,3 +86,9 @@ def add_to_activity_feed(post_id):
     post = Post.get(post_id)
     ActivityFeed.add(int(post.created_at.strftime("%s")), post_id)
     logger.info(f"add_to_activity_feed post_id={post_id}")
+
+
+@app.task(base=RequestContextTask)
+def add_user_avatar(user, avatar_url):
+    user.upload_avatar(avatar_url)
+    logger.info(f"user {user.name} updated avatar")

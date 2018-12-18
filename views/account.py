@@ -47,8 +47,10 @@ def github_logged_in(blueprint, token):
             active=True,
             confirmed_at=datetime.utcnow(),
         )
-        # user.upload_avatar(github_info["avatar_url"]) 需要异步
         if ok:
+            from handler.tasks import add_user_avatar
+
+            add_user_avatar.delay(user, github_info["avatar_url"])
             oauth.user_id = user.id
             oauth.save()
 

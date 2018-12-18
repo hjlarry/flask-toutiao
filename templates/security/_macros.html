@@ -4,7 +4,7 @@
 <div class="form-group {{'hide' if hidden else ''}} {{cls}}">
   <label class="col-sm-4 control-label" for="{{label_id}}">{{label_name}} </label>
   <div class="col-sm-4">
-    <input type="text" name="{% if label_id == 'password' %}password{% else %}text{% endif %}" id="{{ label_id }}"
+    <input type="{% if label_id == 'password' %}password{% else %}text{% endif %}" name="{{ label_id }}" id="{{ label_id }}"
       class="form-control" autofocus="autofocus" autocomplete="off">
   </div>
   {% if field.errors %}

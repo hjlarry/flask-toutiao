@@ -106,4 +106,3 @@ class userFollowStats(BaseMixin, db.Model):
         #  Object '<userFollowStats at 0x1058976d8>' is already attached to session '5' (this is '4')
         st = cls.get(id)
         return st
-

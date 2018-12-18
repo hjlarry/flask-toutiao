@@ -2,10 +2,9 @@ from datetime import datetime
 from flask.blueprints import Blueprint
 from flask import render_template, abort, request
 from flask_security import login_required, current_user, login_user
-from flask_dance.contrib.github import make_github_blueprint, github
+from flask_dance.contrib.github import make_github_blueprint
 from flask_dance.consumer.backend.sqla import SQLAlchemyBackend
 from flask_dance.consumer import oauth_authorized
-from sqlalchemy.orm.exc import NoResultFound
 
 from ext import db
 from models.user import User, OAuth

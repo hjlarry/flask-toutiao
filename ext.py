@@ -362,4 +362,3 @@ db = UnLockedAlchemy(model_class=BaseModel)
 security = Security()
 mail = Mail()
 debug_bar = DebugToolbarExtension()
-

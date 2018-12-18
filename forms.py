@@ -43,4 +43,3 @@ class ExtendedRegisterForm(RegisterForm):
 class ExtendedLoginForm(LoginForm):
     email = StringField("邮箱/用户名", validators=[Required(message="未输入账号内容")])
     password = PasswordField("密码", validators=[password_required])
-

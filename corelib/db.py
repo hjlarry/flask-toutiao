@@ -96,10 +96,12 @@ class PropsItem:
         obj.delete_props_item(self.name)
 
 
-datetime_outputfilter = lambda v: datetime.strptime(
-    v, "%Y-%m-%d %H:%M:%S" if v else None
-)
-date_outputfilter = lambda v: datetime.strptime(v, "%Y-%m-%d").date() if v else None
+def datetime_outputfilter(v):
+    return datetime.strptime(v, "%Y-%m-%d %H:%M:%S") if v else None
+
+
+def date_outputfilter(v):
+    return datetime.strptime(v, "%Y-%m-%d").date() if v else None
 
 
 class DatetimePropsItem(PropsItem):

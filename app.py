@@ -1,4 +1,4 @@
-from flask import g, render_template
+from flask import render_template
 from flask_security import current_user
 from werkzeug.wsgi import DispatcherMiddleware
 
@@ -8,7 +8,7 @@ from corelib.flask_ import Flask
 from corelib.utils import update_url_query
 from ext import db, debug_bar, mail, security
 from forms import ExtendedLoginForm, ExtendedRegisterForm
-from models.user import user_datastore, OAuth, User
+from models.user import user_datastore
 from views.account import bp as account_bp, github_bp
 from views.api.api_app import json_api
 from views.index import bp as index_bp

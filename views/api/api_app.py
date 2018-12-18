@@ -1,4 +1,4 @@
-from flask import Flask, get_template_attribute, request
+from flask import get_template_attribute, request
 from flask.views import MethodView
 
 from ext import db, security

@@ -23,4 +23,3 @@ class httperrors(enum.Enum):
     illegal_state = (1004, "illegal state", 400)
     not_supported = (1005, "暂时不支持此操作", 400)
     post_not_found = (1006, "Post不存在", 400)
-

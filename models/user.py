@@ -3,7 +3,6 @@ from flask_security import UserMixin, RoleMixin, SQLAlchemyUserDatastore
 from sqlalchemy import func as alchemyFn
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy_utils import JSONType
-from flask_dance.consumer.backend.sqla import OAuthConsumerMixin
 
 from ext import db
 from config import UPLOAD_FOLDER
@@ -146,4 +145,3 @@ class OAuth(db.Model, BaseMixin):
 
 
 user_datastore = BranSQLAlchemyUserDatastore(db, User, Role)
-

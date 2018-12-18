@@ -1,6 +1,5 @@
 from flask.blueprints import Blueprint
-from flask import render_template, send_from_directory, abort, request, url_for
-from flask_security import current_user
+from flask import render_template, send_from_directory, request
 
 from models.core import Post, Tag, PostTag
 from models.search import Item

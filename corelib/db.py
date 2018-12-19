@@ -1,6 +1,8 @@
 import copy
 import json
 from datetime import datetime
+
+# walrus 其实这个项目没有用到，是用来orm redis的，这个项目直接用redis-py就可以了
 from walrus import Database
 
 from config import REDIS_URL

@@ -3,11 +3,11 @@
 redis中存储了这些东西: 
 1. post和comment的content
 2. 通过corelib.mc中的cache装饰器的func结果
-3. 通过Model.cache.query查询得到的结果，往往用在model.get上，但好像使用2中的cache装饰器也能实现
+3. 通过Model.cache.query查询得到的结果，往往用在model.get上
 4. 通过CRUD时加减目标计数而无需数据库count
 5. feed 相关
 
-本地进程内缓存，在通过redis获取属性时把结果写入一个字典便于相同属性请求不需走redis，redis设置值、删除值时清楚该本地缓存。localcache中存储了post和comment的content。
+本地进程内缓存，在通过redis获取属性时把结果写入一个字典便于相同属性请求不需走redis，redis设置值、删除值时清除该本地缓存。localcache中存储了post和comment的content。
 
 
 ### 二、 sqlalchemy的使用
@@ -29,17 +29,15 @@ redis中存储了这些东西:
 5. get_template_attribute 拿模板内容
 
 
-### 其他
+### 四、 其他技巧
 1. 抓取内容时可以使用解析feed的方式，很方便
-
 2. celery任务添加flask上下文的方法
-
 3. iconfont使用
-
 4. elesticsearch的使用，以及通过高斯函数特性（衰减先慢后快再慢）得到一个热门分享的算法
+  
+  
 
-
-### 这些地方我觉得可能是个bug
+## 可能是bug点
 
 1. Contact.clear_mc方法中有:
 ```
@@ -61,9 +59,9 @@ return st
 2. 注册发送确认邮件时并未发送我们在templates定义的邮件html页面内容
 这是因为flask_security.utils.send_mail()方法中，有一行代码不同导致：
 ```
-# flask_security的官方仓库的develop分支以及董大那个版本
+// flask_security的官方仓库的develop分支以及董大那个版本
 msg.html = _security.render_template('%s/%s.html' % ctx, **context)
-# flask_security的官方仓库的master分支，也就是直接pip install的版本
+// flask_security的官方仓库的master分支，也就是直接pip install的版本
 msg.html = render_template('%s/%s.html' % ctx, **context)  
 ```
 感觉好坑，其官方文档明确说了替换这些email模板很容易，结果一个3.0的主版本已经发布了一年了还不更新还有这bug
@@ -71,7 +69,8 @@ msg.html = render_template('%s/%s.html' % ctx, **context)
 
 
 3. 项目里所有用到zadd的地方需要改一下，因为redis-py 3.0以上修改了:
-* ZADD now requires all element names/scores be specified in a single
+
+ZADD now requires all element names/scores be specified in a single
   dictionary argument named mapping. This was required to allow the NX,
   XX, CH and INCR options to be specified.
 
@@ -90,11 +89,13 @@ post_ids = rdb.zrange(feed_key, start, end)
 ```
 假设要每页显示3个，那么start是0，end是3，post_ids就是4个元素，我改为了end-1
 
+  
+  
+## 疑惑点
 
-### 还有这些地方比较疑惑
-
-1. dogpile.cache的作用是什么？
+1.  dogpile.cache的作用是什么？
 查了下dogpile是指刚好缓存失效时，大量并发导致服务器挂掉，那么这个库的作用是通过锁线程限制数据库查询？
+感觉这块阻碍了读懂ext.py的很多内容，深入源码感觉太多需要极大的耐心，想看看文档官方文档不爬打不开，爬了也打开极慢，中文资料也很少。希望董大后续有空时能好好讲讲，梳理一下。
 
 
 2. 有的表设了'mysql_charset': 'utf8'，是否没有str相关字段的表都应该这样设置去节省空间?

@@ -99,3 +99,13 @@ post_ids = rdb.zrange(feed_key, start, end)
 
 
 2. 有的表设了'mysql_charset': 'utf8'，是否没有str相关字段的表都应该这样设置去节省空间?
+
+
+## 后续学习记录
+
+1. dogpile实际是一个锁的概念，例如，当一个线程去执行修改某个对象时，其他线程读取的是这个对象的之前版本，若没有之前版本则其他线程阻塞至该对象可读。
+而dogpile.cache是一个缓存API，为redis、memcache提供统一的API和dogpile的锁机制结合在一起。
+
+2. 在corelib.mc中使用了sqlalchemy的序列化和反序列化，它其实是在pickle上包了一层，方便我们在反序列化时使用不同的session，例如读写分离，例如微服务的一些场景
+
+3. 在flask_sqlalchemy的pagnation对象构造后要删除其query属性才能序列化，因为线程锁的原因，否则会序列化或反序列化失败
